@@ -6,74 +6,49 @@ labels: feature
 assignees: ""
 ---
 
-## Feature Description
-Mô tả ngắn gọn về tính năng cần phát triển.
+## Background
+*Mô tả bối cảnh, vấn đề cần giải quyết và giá trị mà tính năng này mang lại.*
 
-Ví dụ:
-- Cho phép người dùng tham gia thiền trực tuyến với chuyên gia.
-- Cho phép ghi lại tâm trạng trước và sau khi thiền.
+**Vấn đề & Động lực (Problem / Motivation):**
+- Tính năng này giải quyết vấn đề gì? *(Ví dụ: Người dùng hiện không có cách nào để theo dõi tâm trạng trước và sau khi thiền).*
+- Ứng dụng cần hỗ trợ điều gì để cải thiện trải nghiệm?
 
----
+**Mô tả tính năng (Feature Description):**
+- Mô tả ngắn gọn về tính năng. *(Ví dụ: Cho phép người dùng tham gia thiền trực tuyến với chuyên gia).*
 
-## Problem / Motivation
-Tính năng này giải quyết vấn đề gì?
+**User Story:**
+> As a **[đối tượng/user]**,  
+> I want to **[thực hiện hành động]**,  
+> so that **[đạt được mục tiêu/lợi ích]**.
 
-- Người dùng hiện không có cách nào để ...
-- Ứng dụng cần hỗ trợ ... để cải thiện trải nghiệm.
-
----
-
-## Proposed Solution
-Mô tả cách triển khai tính năng.
-
-Ví dụ:
-- Thêm màn hình **Meditation Session**
-- Cho phép user:
-  - chọn session
-  - tham gia phòng thiền
-  - theo dõi thời gian thiền
+**Mockups / Tài liệu đính kèm (Optional):**
+- *Đính kèm wireframe, UI design, hoặc link tài liệu (Figma, Notion...) tại đây.*
+- *Ghi chú bổ sung (nếu có).*
 
 ---
 
-## User Story
-As a **user**,  
-I want to **[thực hiện hành động]**,  
-so that **[đạt được mục tiêu]**.
+## To Do
+*Giải pháp đề xuất và danh sách các công việc kỹ thuật cần thực hiện.*
 
-Ví dụ:
+**Giải pháp đề xuất (Proposed Solution):**
+- *Mô tả cách triển khai. Ví dụ:*
+  - *Thêm màn hình **Meditation Session***
+  - *Cho phép user: chọn session, tham gia phòng thiền, theo dõi thời gian...*
 
-As a user,  
-I want to join a live meditation session,  
-so that I can meditate together with other people.
-
----
-
-## Tasks
+**Tasks:**
 - [ ] Thiết kế UI/UX
 - [ ] Implement frontend
 - [ ] Implement backend API
-- [ ] Integrate với hệ thống hiện có
-- [ ] Viết test
-- [ ] Cập nhật documentation
+- [ ] Tích hợp với hệ thống hiện có
+- [ ] Viết test (Unit test / Integration test)
+- [ ] Cập nhật tài liệu (Documentation)
 
 ---
 
 ## Acceptance Criteria
-Điều kiện để feature được xem là hoàn thành.
+*Các điều kiện cụ thể để tính năng được nghiệm thu và đánh giá là hoàn thành (Done).*
 
-- Người dùng có thể truy cập tính năng.
-- Chức năng hoạt động đúng theo thiết kế.
-- Không phát sinh lỗi nghiêm trọng.
-- Đã được review và merge.
-
----
-
-## Screenshots / Mockups (optional)
-Đính kèm wireframe hoặc UI design nếu có.
-
----
-
-## Additional Notes
-Thông tin bổ sung nếu cần.
-
----
+- [ ] Người dùng có thể truy cập và sử dụng tính năng đúng theo luồng thiết kế.
+- [ ] Thỏa mãn các luồng logic cụ thể: *(Liệt kê chi tiết các điều kiện cụ thể của tính năng, ví dụ: Nút "Join" chỉ hiện khi đến giờ thiền).*
+- [ ] Không phát sinh lỗi nghiêm trọng (Fatal/Blocker bugs) và không làm hỏng các tính năng hiện có.
+- [ ] Vượt qua các bài test, code đã được review và merge thành công.
