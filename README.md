@@ -11,7 +11,7 @@
 
 ## Các tính năng cốt lõi (Key Features)
 
-- **Reset System (Ngoại tuyến)**: Hệ thống ổn định trạng thái trong 1–3 phút thông qua hướng dẫn thở, phản hồi rung và hình ảnh trực quan. Tính năng này hoạt động hoàn toàn ngoại tuyến, hỗ trợ người dùng trong các bối cảnh nhạy cảm như trước kỳ thi hoặc cuộc họp.
+- **Reset System (Ngoại tuyến)**: Hệ thống ổn định trạng thái trong 5–20 phút thông qua hướng dẫn thở, phản hồi rung và hình ảnh trực quan. Tính năng này hoạt động hoàn toàn ngoại tuyến, hỗ trợ người dùng trong các bối cảnh nhạy cảm như trước kỳ thi hoặc cuộc họp.
 
 - **Trạm thiền đồng bộ (Synchronized Zen Hubs)**: Không gian thiền ảo thời gian thực giúp kết nối cộng đồng và duy trì kỷ luật thực hành tập thể. Người dùng có thể tiếp cận các phương pháp tu tập bài bản và lộ trình cá nhân hóa trực tiếp từ các Master chuyên môn.
 
