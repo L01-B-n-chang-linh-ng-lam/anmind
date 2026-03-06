@@ -21,7 +21,7 @@
 
 - **Backend**: Spring Boot, Redis, WebSocket  
 - **Infrastructure**: Docker, Envoy  
-- **AI / Data**: Python, Graph Neural Networks (GNNs)
+- **Data**: Python
 
 ## Sứ mệnh (Mission)
 
