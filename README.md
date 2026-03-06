@@ -20,8 +20,7 @@
 ## Nền tảng công nghệ (Tech Stack)
 
 - **Backend**: Spring Boot, Redis, WebSocket  
-- **Infrastructure**: Docker, Envoy  
-- **Data**: Python
+- **Infrastructure**: Docker, Envoy
 
 ## Sứ mệnh (Mission)
 
