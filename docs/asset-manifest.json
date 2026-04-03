@@ -1,16 +1,16 @@
 {
   "files": {
     "main.css": "/anmind/static/css/main.e6c13ad2.css",
-    "main.js": "/anmind/static/js/main.5a5f244a.js",
+    "main.js": "/anmind/static/js/main.33be4d5d.js",
     "static/js/453.3693bc88.chunk.js": "/anmind/static/js/453.3693bc88.chunk.js",
     "static/media/reset.png": "/anmind/static/media/reset.e37b24aa4b7d4d798775.png",
     "index.html": "/anmind/index.html",
     "main.e6c13ad2.css.map": "/anmind/static/css/main.e6c13ad2.css.map",
-    "main.5a5f244a.js.map": "/anmind/static/js/main.5a5f244a.js.map",
+    "main.33be4d5d.js.map": "/anmind/static/js/main.33be4d5d.js.map",
     "453.3693bc88.chunk.js.map": "/anmind/static/js/453.3693bc88.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.e6c13ad2.css",
-    "static/js/main.5a5f244a.js"
+    "static/js/main.33be4d5d.js"
   ]
 }

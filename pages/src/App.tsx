@@ -65,6 +65,13 @@ const App: React.FC = () => {
             >
               Figma
             </a>
+            <a
+              href="https://www.behance.net/gallery/245651213/AnMind"
+              target="_blank"
+              style={styles.secondaryButton}
+            >
+              Behance
+            </a>
           </div>
         </div>
       </section>
