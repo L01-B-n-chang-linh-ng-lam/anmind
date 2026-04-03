@@ -55,7 +55,7 @@ const App: React.FC = () => {
           </p>
 
           <div style={styles.buttonGroup}>
-            <a href="#" style={styles.primaryButton}>
+            <a href="https://github.com/L01-B-n-chang-linh-ng-lam/anmind/wiki" style={styles.primaryButton}>
               GitHub
             </a>
             <a
