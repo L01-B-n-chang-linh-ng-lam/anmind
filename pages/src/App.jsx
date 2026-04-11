@@ -1,7 +1,7 @@
 import LandingPage from './pages/LandingPage';
 
 const App = () => {
-	return <LandingPage />;
+  return <LandingPage />;
 };
 
 export default App;
