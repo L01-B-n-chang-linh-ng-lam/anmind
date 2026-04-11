@@ -47,7 +47,7 @@ const Problem = () => {
             </motion.ul>
           </SectionReveal>
 
-          <SectionReveal delay={0.08} className="flex flex-col gap-6 h-full">
+          <SectionReveal delay={0.08} className="flex flex-col gap-8 h-full">
             <div className="grid grid-cols-2 gap-6">
               <div className="rounded-2xl border border-rose-300/30 bg-gradient-to-br from-rose-500/25 to-orange-500/20 p-6 transition-all duration-300 ease-out will-change-transform hover:-translate-y-0.5 hover:shadow-[0_0_28px_rgba(244,63,94,0.16)]">
                 <p className="text-xs uppercase tracking-[0.2em] text-rose-100/90">Chaos</p>
@@ -62,7 +62,7 @@ const Problem = () => {
                 </p>
               </div>
             </div>
-            <motion.div className="flex-grow overflow-hidden rounded-2xl border border-white/10 bg-black/20 transition duration-300 ease-out will-change-transform hover:shadow-[0_0_45px_rgba(139,92,246,0.14)]" initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true, amount: 0.25 }} transition={{ duration: 0.7, ease: 'easeOut', delay: 0.12 }}>
+            <motion.div className="mt-6 flex-grow overflow-hidden rounded-2xl border border-white/10 bg-black/20 transition duration-300 ease-out will-change-transform hover:shadow-[0_0_45px_rgba(139,92,246,0.14)]" initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true, amount: 0.25 }} transition={{ duration: 0.7, ease: 'easeOut', delay: 0.12 }}>
               <motion.img
                 src="https://placehold.co/1000x520/101530/E9EEFF?text=From+Mental+Noise+to+Clarity"
                 alt="Visual contrast showing chaotic mental state transforming into calm clarity"
