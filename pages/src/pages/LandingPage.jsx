@@ -2,6 +2,7 @@ import Hero from '../components/Hero';
 import Navbar from '../components/Navbar';
 import Problem from '../components/Problem';
 import Insight from '../components/Insight';
+import TargetUsers from '../components/TargetUsers';
 import Solution from '../components/Solution';
 import HowItWorks from '../components/HowItWorks';
 import CoreExperience from '../components/CoreExperience';
@@ -27,6 +28,7 @@ const LandingPage = () => {
         <section id="insight">
           <Insight />
         </section>
+        <TargetUsers />
         <section id="solution">
           <Solution />
         </section>
