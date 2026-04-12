@@ -1,15 +1,26 @@
 {
   "files": {
-    "main.css": "/anmind/static/css/main.55534c8d.css",
-    "main.js": "/anmind/static/js/main.f00ca529.js",
+    "main.css": "/anmind/static/css/main.ca33cc67.css",
+    "main.js": "/anmind/static/js/main.a7c4d49d.js",
     "static/js/453.3693bc88.chunk.js": "/anmind/static/js/453.3693bc88.chunk.js",
+    "static/media/review.png": "/anmind/static/media/review.96a831a1490fdf981d0a.png",
+    "static/media/core-experience.png": "/anmind/static/media/core-experience.2d1051b71ab28e116398.png",
+    "static/media/trimmed-image-station.png": "/anmind/static/media/trimmed-image-station.6c6b9099d0a4ab0b015f.png",
+    "static/media/trimmed-image-progress.png": "/anmind/static/media/trimmed-image-progress.fba22ab62d2c1cba0770.png",
+    "static/media/trimmed-image-reset-end.png": "/anmind/static/media/trimmed-image-reset-end.8bf1f9c52790475b1878.png",
+    "static/media/trimmed-image-reset-start.png": "/anmind/static/media/trimmed-image-reset-start.3124e7e3070add8ac418.png",
+    "static/media/problem.jpeg": "/anmind/static/media/problem.c2d32d16232e5247a723.jpeg",
+    "static/media/stress.jpg": "/anmind/static/media/stress.baac9bbb3828812f89ab.jpg",
+    "static/media/logo.svg": "/anmind/static/media/logo.dab9b49cbe19fdbefb2253be6cb84d65.svg",
+    "static/media/meditation.jpg": "/anmind/static/media/meditation.f0ed06a8c9b6a6d8b2c3.jpg",
+    "static/media/productive.jpg": "/anmind/static/media/productive.df16e60412f6443a7b05.jpg",
     "index.html": "/anmind/index.html",
-    "main.55534c8d.css.map": "/anmind/static/css/main.55534c8d.css.map",
-    "main.f00ca529.js.map": "/anmind/static/js/main.f00ca529.js.map",
+    "main.ca33cc67.css.map": "/anmind/static/css/main.ca33cc67.css.map",
+    "main.a7c4d49d.js.map": "/anmind/static/js/main.a7c4d49d.js.map",
     "453.3693bc88.chunk.js.map": "/anmind/static/js/453.3693bc88.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.55534c8d.css",
-    "static/js/main.f00ca529.js"
+    "static/css/main.ca33cc67.css",
+    "static/js/main.a7c4d49d.js"
   ]
 }
