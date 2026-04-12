@@ -3,13 +3,17 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Container from './Container';
 import SectionReveal from './SectionReveal';
+import resetStartImage from '../assets/trimmed-image-reset-start.png';
+import progressImage from '../assets/trimmed-image-progress.png';
+import moodCheckingImage from '../assets/trimmed-image-reset-end.png';
+import stationImage from '../assets/trimmed-image-station.png';
 
 const screens = [
   {
     id: 1,
     title: 'Guided Breathing',
     subtitle: 'Follow calming breath patterns',
-    image: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=300&h=600&fit=crop',
+    image: resetStartImage,
     accent: 'from-violet-500/30 to-purple-500/20',
     border: 'border-violet-300/30',
     shadow: 'shadow-[0_0_40px_rgba(167,139,250,0.3)]',
@@ -18,7 +22,7 @@ const screens = [
     id: 2,
     title: 'Mood Check-In',
     subtitle: 'Track how you feel',
-    image: 'https://images.unsplash.com/photo-1518611505868-48510c8dfa93?w=300&h=600&fit=crop',
+    image: moodCheckingImage,
     accent: 'from-blue-500/30 to-cyan-500/20',
     border: 'border-blue-300/30',
     shadow: 'shadow-[0_0_40px_rgba(59,130,246,0.3)]',
@@ -27,7 +31,7 @@ const screens = [
     id: 3,
     title: 'Progress Tracking',
     subtitle: 'Watch your calm moments grow',
-    image: 'https://images.unsplash.com/photo-1460925895917-adf4e565f900?w=300&h=600&fit=crop',
+    image: progressImage,
     accent: 'from-emerald-500/30 to-teal-500/20',
     border: 'border-emerald-300/30',
     shadow: 'shadow-[0_0_40px_rgba(16,185,129,0.3)]',
@@ -36,7 +40,7 @@ const screens = [
     id: 4,
     title: 'Meditation Station',
     subtitle: 'Guided sessions for any moment',
-    image: 'https://images.unsplash.com/photo-1506157786151-b8491531f063?w=300&h=600&fit=crop',
+    image: stationImage,
     accent: 'from-pink-500/30 to-rose-500/20',
     border: 'border-pink-300/30',
     shadow: 'shadow-[0_0_40px_rgba(236,72,153,0.3)]',
@@ -101,7 +105,7 @@ const AppScreensCarousel = () => {
         {/* Carousel */}
         <div className="relative mt-20 flex flex-col items-center gap-12 px-4">
           {/* Phone mockup carousel */}
-          <div className="relative h-[540px] w-full max-w-4xl">
+          <div className="relative h-[540px] w-full max-w-4xl flex justify-center">
             <AnimatePresence initial={false} custom={direction} mode="wait">
               <motion.div
                 key={currentIndex}
@@ -115,23 +119,21 @@ const AppScreensCarousel = () => {
                   opacity: { duration: 0.4 },
                   scale: { duration: 0.4 },
                 }}
-                className="absolute left-1/2 top-0 flex w-72 -translate-x-1/2 flex-col items-center sm:w-80"
+                className="absolute top-0 flex w-72 flex-col items-center"
               >
                 {/* Phone frame mockup */}
                 <motion.div
-                  className={`relative h-96 w-full overflow-hidden rounded-[2.5rem] border-4 border-slate-700 bg-gradient-to-br ${screens[currentIndex].accent} shadow-2xl sm:h-[420px]`}
+                  className={`relative h-96 overflow-hidden rounded-[2.0rem] bg-gradient-to-br ${screens[currentIndex].accent} shadow-2xl sm:h-[420px]`}
                   whileHover={{ scale: 1.02 }}
-                  transition={{ duration: 0.3 }}
+                  transition={{ duration: 1.0, ease: 'easeInOut' }}
                 >
-                  {/* Phone notch */}
-                  <div className="absolute top-0 left-1/2 z-20 h-5 w-40 -translate-x-1/2 rounded-b-3xl border-4 border-t-0 border-slate-700 bg-black" />
 
                   {/* Glow effect */}
                   <div className={`pointer-events-none absolute inset-0 rounded-[2.25rem] ${screens[currentIndex].shadow}`} />
 
                   {/* Screen content */}
                   <motion.div
-                    className="relative h-full w-full overflow-hidden rounded-[2.25rem] bg-gradient-to-b from-slate-950 to-black"
+                    className="relative h-full w-full overflow-hidden bg-gradient-to-b from-slate-950 to-black"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ duration: 0.4, delay: 0.1 }}
@@ -148,9 +150,6 @@ const AppScreensCarousel = () => {
                     {/* Content overlay */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
                   </motion.div>
-
-                  {/* Phone bottom button simulation */}
-                  <div className="absolute bottom-0 left-1/2 h-1 w-20 -translate-x-1/2 rounded-full bg-slate-700" />
                 </motion.div>
 
                 {/* Screen title and subtitle below phone */}
@@ -175,7 +174,7 @@ const AppScreensCarousel = () => {
               onClick={() => paginate(-1)}
               onMouseEnter={() => setAutoPlay(false)}
               onMouseLeave={() => setAutoPlay(true)}
-              className="absolute -left-12 top-1/3 z-10 rounded-full border border-white/20 bg-white/5 p-3 text-white backdrop-blur-sm transition-all duration-300 hover:border-white/40 hover:bg-white/10 hover:scale-110 sm:-left-16 sm:p-3.5"
+              className="absolute left-0 top-1/3 z-10 rounded-full border border-white/20 bg-white/5 p-3 text-white backdrop-blur-sm transition-all duration-300 hover:border-white/40 hover:bg-white/10 hover:scale-110 sm:-left-16 sm:p-3.5"
               aria-label="Previous screen"
             >
               <ChevronLeft className="h-5 w-5 sm:h-6 sm:w-6" />
@@ -185,7 +184,7 @@ const AppScreensCarousel = () => {
               onClick={() => paginate(1)}
               onMouseEnter={() => setAutoPlay(false)}
               onMouseLeave={() => setAutoPlay(true)}
-              className="absolute -right-12 top-1/3 z-10 rounded-full border border-white/20 bg-white/5 p-3 text-white backdrop-blur-sm transition-all duration-300 hover:border-white/40 hover:bg-white/10 hover:scale-110 sm:-right-16 sm:p-3.5"
+              className="absolute right-0 top-1/3 z-10 rounded-full border border-white/20 bg-white/5 p-3 text-white backdrop-blur-sm transition-all duration-300 hover:border-white/40 hover:bg-white/10 hover:scale-110 sm:-right-16 sm:p-3.5"
               aria-label="Next screen"
             >
               <ChevronRight className="h-5 w-5 sm:h-6 sm:w-6" />

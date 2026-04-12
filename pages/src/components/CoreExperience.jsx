@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { Headphones } from 'lucide-react';
 import Container from './Container';
 import SectionReveal from './SectionReveal';
+import calmImage from '../assets/core-experience.png';
 
 const CoreExperience = () => {
   return (
@@ -32,7 +33,7 @@ const CoreExperience = () => {
               </div>
               <motion.div className="relative overflow-hidden rounded-xl border border-white/10" initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true, amount: 0.25 }} transition={{ duration: 0.72, ease: 'easeOut' }}>
                 <motion.img
-                  src="https://placehold.co/1200x820/0A122B/D9E2FF?text=Immersive+Reset+Journey"
+                  src={calmImage}
                   alt="Immersive AnMind reset journey with breathing guidance and layered glow"
                   className="h-full w-full object-cover"
                   initial={{ scale: 0.95 }}

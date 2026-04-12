@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { Sparkles } from 'lucide-react';
 import Container from './Container';
 import SectionReveal from './SectionReveal';
+import reviewImage from '../assets/review.png';
 
 const Solution = () => {
   return (
@@ -30,7 +31,7 @@ const Solution = () => {
           <SectionReveal delay={0.08} className="section-glass overflow-hidden p-3 transition duration-300 ease-out will-change-transform hover:scale-[1.02] hover:shadow-[0_0_45px_rgba(34,211,238,0.14)]">
             <motion.div className="overflow-hidden rounded-2xl border border-white/10" initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true, amount: 0.25 }} transition={{ duration: 0.72, ease: 'easeOut' }}>
               <motion.img
-                src="https://placehold.co/1000x680/11183B/C9D8FF?text=Instant+Reset+Preview"
+                src={reviewImage}
                 alt="AnMind UI preview of the instant reset breathing interface"
                 className="h-full w-full object-cover"
                 initial={{ scale: 0.95 }}

@@ -1,5 +1,6 @@
 import Container from './Container';
 import Button from './Button';
+import logoImage from '../assets/logo.svg';
 
 const links = [
   { label: 'Problem', href: '#problem' },
@@ -15,11 +16,11 @@ const Navbar = () => {
       <Container className="flex h-16 items-center justify-between gap-4">
         <a href="#top" className="flex items-center gap-3 text-white transition hover:opacity-90">
           <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/15 bg-white/10 font-display text-lg font-semibold shadow-[0_0_24px_rgba(139,92,246,0.28)]">
-            A
+            <img src={logoImage} alt="AnMind Logo" className="h-8 w-8" />
           </span>
           <div className="leading-tight">
             <div className="font-display text-base font-semibold tracking-wide">AnMind</div>
-            <div className="text-[11px] uppercase tracking-[0.24em] text-slate-400">Reset with clarity</div>
+            <div className="text-[11px] uppercase tracking-[0.24em] text-slate-400">Reset your mind instantly</div>
           </div>
         </a>
 

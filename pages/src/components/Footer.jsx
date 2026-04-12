@@ -1,4 +1,5 @@
 import Container from './Container';
+import logoImage from '../assets/logo.svg';
 
 const Footer = () => {
   return (
@@ -7,12 +8,12 @@ const Footer = () => {
         <div className="grid gap-8 md:grid-cols-[1.2fr_0.9fr_0.9fr] md:items-start">
           <div>
             <div className="flex items-center gap-3 text-white">
-              <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/15 bg-white/10 font-display text-lg font-semibold shadow-[0_0_24px_rgba(139,92,246,0.28)]">
-                A
+              <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/15 bg-white shadow-[0_0_24px_rgba(139,92,246,0.28)]">
+                <img src={logoImage} alt="AnMind Logo" className="h-8 w-8" />
               </span>
               <div>
                 <div className="font-display text-lg font-semibold">AnMind</div>
-                <div className="text-xs uppercase tracking-[0.24em] text-slate-400">Reset with clarity</div>
+                <div className="text-xs uppercase tracking-[0.24em] text-slate-400">Reset your mind instantly</div>
               </div>
             </div>
             <p className="mt-4 max-w-md text-sm leading-relaxed text-slate-300">
@@ -23,8 +24,8 @@ const Footer = () => {
 
           <div>
             <p className="text-xs uppercase tracking-[0.24em] text-slate-400">Contact</p>
-            <a href="mailto:hello@anmind.app" className="mt-3 block text-sm text-white transition hover:text-violet-200">
-              hello@anmind.app
+            <a href="mailto:nguyenvu04.work@gmail.com" className="mt-3 block text-sm text-white transition hover:text-violet-200">
+              nguyenvu04.work@gmail.com
             </a>
           </div>
 

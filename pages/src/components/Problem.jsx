@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { AlertTriangle, Bell, Brain } from 'lucide-react';
 import Container from './Container';
 import SectionReveal from './SectionReveal';
+import problemImage from '../assets/problem.jpeg';
 
 const bullets = [
   { icon: Bell, text: 'A work message lands at the worst time and the whole body tenses before you can answer.' },
@@ -64,7 +65,7 @@ const Problem = () => {
             </div>
             <motion.div className="mt-6 flex-grow overflow-hidden rounded-2xl border border-white/10 bg-black/20 transition duration-300 ease-out will-change-transform hover:shadow-[0_0_45px_rgba(139,92,246,0.14)]" initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true, amount: 0.25 }} transition={{ duration: 0.7, ease: 'easeOut', delay: 0.12 }}>
               <motion.img
-                src="https://placehold.co/1000x520/101530/E9EEFF?text=From+Mental+Noise+to+Clarity"
+                src={problemImage}
                 alt="Visual contrast showing chaotic mental state transforming into calm clarity"
                 className="h-full w-full object-cover"
                 initial={{ scale: 0.95 }}

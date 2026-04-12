@@ -3,11 +3,15 @@ import { useEffect, useState } from 'react';
 import { BrainCircuit, Sparkles, Wind } from 'lucide-react';
 import Container from './Container';
 import Button from './Button';
+import stressImage from '../assets/stress.jpg';
+import meditationImage from '../assets/meditation.jpg';
+import productiveImage from '../assets/productive.jpg';
 
 const slides = [
   {
     eyebrow: 'Problem',
     title: 'Overwhelmed by constant noise?',
+    image: stressImage,
     body:
       'Notifications, pressure, and unfinished thoughts stack up fast. AnMind gives the mind a place to land when everything feels too loud.',
     visual: 'from-rose-500/30 via-orange-400/20 to-amber-200/10',
@@ -17,6 +21,7 @@ const slides = [
   {
     eyebrow: 'Experience',
     title: 'Breathe. Slow down. Reset.',
+    image: meditationImage,
     body:
       'A guided breathing flow sets the pace for you. Each inhale and exhale becomes a signal to soften tension and settle the body.',
     visual: 'from-violet-500/35 via-fuchsia-500/20 to-cyan-300/10',
@@ -26,6 +31,7 @@ const slides = [
   {
     eyebrow: 'Outcome',
     title: 'Back in control.',
+    image: productiveImage,
     body:
       'The fog lifts. Thoughts slow down. You return with more clarity, steadier breathing, and enough space to respond instead of react.',
     visual: 'from-cyan-500/25 via-sky-400/15 to-emerald-300/10',
@@ -76,7 +82,7 @@ const Hero = () => {
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.45, ease: 'easeOut' }}
               >
-                <p className="mt-4 max-w-xl text-xl font-medium text-violet-100 sm:text-2xl lg:mx-0">
+                <p className="mt-4 lg:max-w-xl text-xl font-medium text-violet-100 sm:text-2xl lg:mx-0 lg:min-h-[160px]">
                   {currentSlide.title}
                 </p>
                 <motion.p
@@ -185,7 +191,7 @@ const Hero = () => {
 
                     <div className={`mt-8 rounded-2xl border border-white/10 ${currentSlide.accent} px-4 py-3`}>
                       <p className="text-xs uppercase tracking-[0.22em] text-white/70">Slide {activeSlide + 1} of 3</p>
-                      <p className="mt-2 text-sm text-white/90">Auto-rotating story flow with calm pacing.</p>
+                      <p className="mt-2 text-sm text-white/90">Feel the mind slow down.</p>
                     </div>
                   </div>
 
@@ -197,8 +203,8 @@ const Hero = () => {
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 1.02 }}
-                        transition={{ duration: 0.65, ease: 'easeOut' }}
-                        src={`https://placehold.co/960x1200/${activeSlide === 0 ? '24113F' : activeSlide === 1 ? '0E1436' : '052033'}/${activeSlide === 0 ? 'F4D4E8' : activeSlide === 1 ? 'D9D9FF' : 'CFFBFF'}?text=${encodeURIComponent(currentSlide.title)}`}
+                        transition={{ duration: 1.6, ease: 'easeOut' }}
+                        src={currentSlide.image}
                         alt={`AnMind slide visual for ${currentSlide.title}`}
                         className="h-full w-full object-cover"
                       />
