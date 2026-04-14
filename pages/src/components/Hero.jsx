@@ -74,27 +74,23 @@ const Hero = () => {
             <h1 className="font-display text-5xl font-semibold tracking-tight text-white sm:text-6xl lg:text-7xl">
               AnMind
             </h1>
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={currentSlide.title + '-copy'}
-                initial={{ opacity: 0, y: 12 }}
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.45, ease: 'easeOut' }}
+            >
+              <p className="mt-4 text-xl font-medium text-violet-100 sm:text-2xl lg:mx-0 lg:max-w-xl lg:min-h-[320px]">
+                Back in control.
+              </p>
+              <motion.p
+                initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.45, ease: 'easeOut' }}
+                transition={{ duration: 0.55, delay: 0.12 }}
+                className="text-lg text-gray-300 mt-4 max-w-xl leading-relaxed lg:text-lg"
               >
-                <p className="mt-4 lg:max-w-xl text-xl font-medium text-violet-100 sm:text-2xl lg:mx-0 lg:min-h-[160px]">
-                  {currentSlide.title}
-                </p>
-                <motion.p
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.55, delay: 0.12 }}
-                  className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-slate-300 lg:mx-0 lg:text-lg"
-                >
-                  {currentSlide.body}
-                </motion.p>
-              </motion.div>
-            </AnimatePresence>
+                A meditation app that helps you reset your mind instantly — bringing clarity, calm, and control back when you need it most.
+              </motion.p>
+            </motion.div>
 
             <div className="mt-9 flex flex-wrap items-center justify-center gap-3 lg:justify-start">
               <Button href="https://www.behance.net/gallery/245651213/AnMind">View Case Study</Button>
@@ -105,37 +101,6 @@ const Hero = () => {
                 View Design (Figma)
               </Button>
             </div>
-
-            <div className="mt-10 grid gap-3 sm:grid-cols-3">
-              {slides.map((slide, index) => {
-                const active = index === activeSlide;
-                return (
-                  <button
-                    key={slide.title}
-                    type="button"
-                    onClick={() => setActiveSlide(index)}
-                    className={`rounded-2xl border p-4 text-left transition duration-300 ${
-                      active
-                        ? 'border-white/20 bg-white/10 shadow-[0_0_30px_rgba(139,92,246,0.24)]'
-                        : 'border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/8'
-                    }`}
-                  >
-                    <span className="block text-[11px] uppercase tracking-[0.24em] text-slate-400">0{index + 1}</span>
-                    <span className="mt-2 block text-sm font-semibold text-white">{slide.eyebrow}</span>
-                  </button>
-                );
-              })}
-            </div>
-
-              <div className="mt-4 h-1 overflow-hidden rounded-full bg-white/10">
-                <motion.div
-                  key={activeSlide}
-                  initial={{ scaleX: 0 }}
-                  animate={{ scaleX: 1 }}
-                  transition={{ duration: 4.5, ease: 'linear' }}
-                  className="h-full origin-left rounded-full bg-gradient-to-r from-violet-300 via-fuchsia-300 to-cyan-200"
-                />
-              </div>
           </motion.div>
 
           <motion.div

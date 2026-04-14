@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/anmind/static/css/main.ca33cc67.css",
-    "main.js": "/anmind/static/js/main.a7c4d49d.js",
+    "main.css": "/anmind/static/css/main.f2de88c4.css",
+    "main.js": "/anmind/static/js/main.85e461eb.js",
     "static/js/453.3693bc88.chunk.js": "/anmind/static/js/453.3693bc88.chunk.js",
     "static/media/review.png": "/anmind/static/media/review.96a831a1490fdf981d0a.png",
     "static/media/core-experience.png": "/anmind/static/media/core-experience.2d1051b71ab28e116398.png",
@@ -15,12 +15,12 @@
     "static/media/meditation.jpg": "/anmind/static/media/meditation.f0ed06a8c9b6a6d8b2c3.jpg",
     "static/media/productive.jpg": "/anmind/static/media/productive.df16e60412f6443a7b05.jpg",
     "index.html": "/anmind/index.html",
-    "main.ca33cc67.css.map": "/anmind/static/css/main.ca33cc67.css.map",
-    "main.a7c4d49d.js.map": "/anmind/static/js/main.a7c4d49d.js.map",
+    "main.f2de88c4.css.map": "/anmind/static/css/main.f2de88c4.css.map",
+    "main.85e461eb.js.map": "/anmind/static/js/main.85e461eb.js.map",
     "453.3693bc88.chunk.js.map": "/anmind/static/js/453.3693bc88.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.ca33cc67.css",
-    "static/js/main.a7c4d49d.js"
+    "static/css/main.f2de88c4.css",
+    "static/js/main.85e461eb.js"
   ]
 }

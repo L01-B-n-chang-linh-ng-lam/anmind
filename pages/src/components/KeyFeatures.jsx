@@ -6,22 +6,22 @@ import SectionReveal from './SectionReveal';
 const features = [
   {
     title: 'Immediate Relief',
-    text: 'When the moment turns sharp, one tap starts a guided reset before the spiral gains speed.',
+    text: 'Start a guided reset instantly when stress begins to build.',
     icon: Gauge,
   },
   {
-    title: 'Guided Breathing Sessions',
-    text: 'Short sequences that meet you where you are, without asking for extra focus or setup.',
+    title: 'Meditation Station',
+    text: 'Choose a session that fits your mood and reset without overthinking.',
     icon: Compass,
   },
   {
     title: 'Visible Progress',
-    text: 'Small wins become visible, giving the practice momentum instead of feeling invisible.',
+    text: 'Track your progress and see your calm improve over time.',
     icon: LineChart,
   },
   {
     title: 'Mood Awareness',
-    text: 'Gentle check-ins that surface tension early, before stress turns into overwhelm.',
+    text: 'Check in with your emotions and catch stress before it escalates.',
     icon: Smile,
   },
 ];
