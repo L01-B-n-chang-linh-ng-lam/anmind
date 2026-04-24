@@ -109,10 +109,10 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           args: >
-            -Dsonar.organization=${{ vars.SONAR_ORGANIZATION }}
-            -Dsonar.projectKey=${{ vars.SONAR_PROJECT_KEY }}
-            -Dsonar.projectName=${{ vars.SONAR_PROJECT_NAME }}
-            -Dsonar.projectVersion=${{ vars.SONAR_PROJECT_VERSION }}
+            -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}
+            -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
+            -Dsonar.projectName=${{ secrets.SONAR_PROJECT_NAME }}
+            -Dsonar.projectVersion=${{ secrets.SONAR_PROJECT_VERSION }}
             -Dsonar.sourceEncoding=UTF-8
             -Dsonar.sources=backend/src,mobile/app,mobile/components,mobile/hooks
             -Dsonar.tests=backend/src,mobile/test
