@@ -1,5 +1,5 @@
+import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { fireEvent, render, screen } from '@testing-library/react-native';
-import { describe, expect, it, jest } from '@jest/globals';
 
 // ── Mocks ────────────────────────────────────────────────────────────────────
 const mockPush = jest.fn();
