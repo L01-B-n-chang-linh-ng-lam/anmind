@@ -30,6 +30,13 @@ jest.mock('expo-status-bar', () => ({
   StatusBar: () => null,
 }));
 
+jest.mock('@sentry/react-native', () => ({
+  init: jest.fn(),
+  wrap: (component: any) => component,
+  mobileReplayIntegration: jest.fn(() => ({})),
+  feedbackIntegration: jest.fn(() => ({})),
+}));
+
 const mockUseColorScheme = jest.fn<() => 'light' | 'dark'>().mockReturnValue('light');
 jest.mock('@/hooks/use-color-scheme', () => ({
   useColorScheme: () => mockUseColorScheme(),
