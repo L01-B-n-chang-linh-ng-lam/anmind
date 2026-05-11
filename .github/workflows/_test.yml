@@ -12,14 +12,14 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version-file: 'app/package.json'
+          node-version-file: 'backend/package.json'
           cache: npm
-          cache-dependency-path: app/package-lock.json
+          cache-dependency-path: backend/package-lock.json
 
       - name: Install dependencies
-        working-directory: app
+        working-directory: backend
         run: npm ci
 
       - name: Run unit tests
-        working-directory: app
-        run: npm test
+        working-directory: backend
+        run: npm test -- --ci

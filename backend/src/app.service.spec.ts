@@ -11,7 +11,10 @@ describe('AppService', () => {
     expect(appService).toBeDefined();
   });
 
-  it('should return hello world message', () => {
-    expect(appService.getHello()).toBe('Hello World!');
+  it('should return backend metadata', () => {
+    expect(appService.getMetadata()).toEqual({
+      service: 'backend',
+      status: 'ok',
+    });
   });
 });

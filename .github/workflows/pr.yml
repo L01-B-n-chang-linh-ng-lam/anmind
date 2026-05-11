@@ -12,30 +12,30 @@ jobs:
     name: Detect changed paths
     runs-on: ubuntu-latest
     outputs:
-      app: ${{ steps.filter.outputs.app }}
+      backend: ${{ steps.filter.outputs.backend }}
     steps:
       - uses: actions/checkout@v6
       - uses: dorny/paths-filter@v3
         id: filter
         with:
           filters: |
-            app:
-              - 'app/**'
+            backend:
+              - 'backend/**'
               - 'backend/Dockerfile'
               - '.github/workflows/**'
               - '.github/actions/**'
 
-  # lint:
-  #   needs: changes
-  #   if: needs.changes.outputs.app == 'true'
-  #   uses: ./.github/workflows/_lint.yml
+  lint:
+    needs: changes
+    if: needs.changes.outputs.backend == 'true'
+    uses: ./.github/workflows/_lint.yml
 
-  # test:
-  #   needs: changes
-  #   if: needs.changes.outputs.app == 'true'
-  #   uses: ./.github/workflows/_test.yml
+  test:
+    needs: changes
+    if: needs.changes.outputs.backend == 'true'
+    uses: ./.github/workflows/_test.yml
 
   docker-build:
     needs: changes
-    if: needs.changes.outputs.app == 'true'
+    if: needs.changes.outputs.backend == 'true'
     uses: ./.github/workflows/_docker-build.yml

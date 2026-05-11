@@ -9,9 +9,18 @@ jest.mock('@nestjs/core', () => ({
 
 describe('main bootstrap', () => {
   const originalPort = process.env.PORT;
+  const setCreateMock = (listen: jest.Mock) => {
+    // eslint-disable-next-line @typescript-eslint/unbound-method
+    const createMock = NestFactory.create as jest.MockedFunction<
+      typeof NestFactory.create
+    >;
+
+    createMock.mockResolvedValue({ listen } as never);
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
+
     delete require.cache[require.resolve('./main')];
     delete process.env.PORT;
   });
@@ -25,29 +34,34 @@ describe('main bootstrap', () => {
   });
 
   it('should bootstrap app and listen on default port', async () => {
+    // eslint-disable-next-line @typescript-eslint/unbound-method
+    const createMock = NestFactory.create as jest.MockedFunction<
+      typeof NestFactory.create
+    >;
     const listen = jest.fn().mockResolvedValue(undefined);
-    (NestFactory.create as jest.Mock).mockResolvedValue({ listen });
+    setCreateMock(listen);
 
     jest.isolateModules(() => {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       require('./main');
     });
 
     await Promise.resolve();
     await Promise.resolve();
 
-    expect(NestFactory.create).toHaveBeenCalledTimes(1);
-    expect((NestFactory.create as jest.Mock).mock.calls[0][0]?.name).toBe(
-      AppModule.name,
-    );
-    expect(listen).toHaveBeenCalledWith(3000);
+    expect(createMock).toHaveBeenCalledTimes(1);
+    const [calledModule] = createMock.mock.calls[0] ?? [];
+    expect(calledModule?.name).toBe(AppModule.name);
+    expect(listen).toHaveBeenCalledWith(8080);
   });
 
   it('should listen on port from environment', async () => {
     const listen = jest.fn().mockResolvedValue(undefined);
-    (NestFactory.create as jest.Mock).mockResolvedValue({ listen });
+    setCreateMock(listen);
     process.env.PORT = '4200';
 
     jest.isolateModules(() => {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       require('./main');
     });
 

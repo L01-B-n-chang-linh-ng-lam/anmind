@@ -37,7 +37,7 @@ jobs:
         run: |
           az containerapp update \
             --resource-group rg-anmind-dev \
-            --name containerapp-anmind \
+            --name ca-anmind-dev \
             --image ${{ inputs.acr-login-server }}/${{ inputs.image-name }}:sha-${{ github.sha }}
 
       - name: Get FQDN
@@ -45,7 +45,7 @@ jobs:
         run: |
           FQDN=$(az containerapp show \
             --resource-group rg-anmind-dev \
-            --name containerapp-anmind \
+            --name ca-anmind-dev \
             --query properties.configuration.ingress.fqdn \
             --output tsv)
           echo "fqdn=$FQDN" >> $GITHUB_OUTPUT
