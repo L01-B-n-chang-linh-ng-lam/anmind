@@ -1,0 +1,76 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String   @id @default(uuid()) @db.Uuid
+  username  String   @unique
+  password  String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  resetSessions          ResetSession[]
+  userMeditationSessions UserMeditationSession[]
+
+  @@map("user")
+}
+
+model ResetSession {
+  id              String    @id @default(uuid()) @db.Uuid
+  externalId      String?   @unique @map("external_id")
+  userId          String?   @db.Uuid @map("user_id")
+  durationMinutes Int       @map("duration_minutes")
+  startedAt       DateTime  @map("started_at")
+  endedAt         DateTime? @map("ended_at")
+  completed       Boolean   @default(false)
+  createdAt       DateTime  @default(now()) @map("created_at")
+
+  user      User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
+  moodEntry MoodEntry?
+
+  @@map("reset_session")
+}
+
+model MoodEntry {
+  id             String   @id @default(uuid()) @db.Uuid
+  resetSessionId String   @unique @db.Uuid @map("reset_session_id")
+  scoreBefore    Int?     @map("score_before")
+  scoreAfter     Int?     @map("score_after")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  resetSession ResetSession @relation(fields: [resetSessionId], references: [id], onDelete: Cascade)
+
+  @@map("mood_entry")
+}
+
+model MeditationSession {
+  id              String   @id @default(uuid()) @db.Uuid
+  title           String
+  description     String?
+  startTime       DateTime @map("start_time")
+  durationMinutes Int      @map("duration_minutes")
+  meetLink        String?  @map("meet_link")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  userMeditationSessions UserMeditationSession[]
+
+  @@map("meditation_session")
+}
+
+model UserMeditationSession {
+  id                  String    @id @default(uuid()) @db.Uuid
+  userId              String?   @db.Uuid @map("user_id")
+  meditationSessionId String?   @db.Uuid @map("meditation_session_id")
+  joinedAt            DateTime? @map("joined_at")
+  completed           Boolean   @default(false)
+
+  user              User?              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  meditationSession MeditationSession? @relation(fields: [meditationSessionId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, meditationSessionId])
+  @@map("user_meditation_session")
+}

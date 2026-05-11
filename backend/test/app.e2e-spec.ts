@@ -1,13 +1,14 @@
+import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
-import { afterEach, beforeEach, describe, it } from '@jest/globals';
 import request from 'supertest';
 import { App } from 'supertest/types';
-import { DatabaseService } from './../src/database/database.service';
-import { AppModule } from './../src/app.module';
+import { GlobalExceptionFilter } from '../src/common/filters/global-exception.filter.js';
+import { AppModule } from '../src/app.module.js';
+import { DatabaseService } from '../src/database/database.service.js';
+import { PrismaService } from '../src/prisma/prisma.service.js';
 
-describe('AppController (e2e)', () => {
-  let app: INestApplication;
+describe('App (e2e)', () => {
+  let app: INestApplication<App>;
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -17,9 +18,15 @@ describe('AppController (e2e)', () => {
       .useValue({
         ping: jest.fn().mockResolvedValue(true),
       })
+      .overrideProvider(PrismaService)
+      .useValue({})
       .compile();
 
     app = moduleFixture.createNestApplication();
+    app.useGlobalPipes(
+      new ValidationPipe({ whitelist: true, transform: true }),
+    );
+    app.useGlobalFilters(new GlobalExceptionFilter());
     await app.init();
   });
 
@@ -41,10 +48,27 @@ describe('AppController (e2e)', () => {
       database: 'up',
     });
   });
-
   afterEach(async () => {
     if (app) {
       await app.close();
     }
+  });
+
+  it('POST /auth/signup - returns 400 for missing fields', () => {
+    return request(app.getHttpServer())
+      .post('/auth/signup')
+      .send({})
+      .expect(400)
+      .expect((res) => {
+        expect(res.body.error).toBeDefined();
+        expect(res.body.error.code).toBe('VALIDATION_ERROR');
+      });
+  });
+
+  it('POST /auth/login - returns 400 for missing fields', () => {
+    return request(app.getHttpServer())
+      .post('/auth/login')
+      .send({})
+      .expect(400);
   });
 });
