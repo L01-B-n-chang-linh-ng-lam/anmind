@@ -47,7 +47,8 @@ export class ResetService {
       return { session, mood };
     });
 
-    const improvement = result.mood.scoreBefore - result.mood.scoreAfter;
+    const improvement =
+      (result.mood.scoreBefore ?? 0) - (result.mood.scoreAfter ?? 0);
 
     return {
       session_id: result.session.id,
