@@ -1,0 +1,18 @@
+name: Setup Node
+description: Checkout code and install Node.js dependencies for the backend/ directory
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/checkout@v6
+
+    - uses: actions/setup-node@v6
+      with:
+        node-version-file: 'backend/package.json'
+        cache: npm
+        cache-dependency-path: backend/package-lock.json
+
+    - name: Install dependencies
+      shell: bash
+      working-directory: backend
+      run: npm ci
