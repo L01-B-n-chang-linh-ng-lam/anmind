@@ -5,14 +5,15 @@
 -- =========================
 -- USERS
 -- =========================
+-- All seed users have password: admin
 INSERT INTO "user" (id, username, password)
 VALUES
-('00000000-0000-0000-0000-000000000001', 'admin', 'admin'),
-('00000000-0000-0000-0000-000000000002', 'vu', 'admin'),
-('00000000-0000-0000-0000-000000000003', 'vinh', 'admin'),
-('00000000-0000-0000-0000-000000000004', 'lamvu', 'admin'),
-('00000000-0000-0000-0000-000000000005', 'minh', 'admin'),
-('00000000-0000-0000-0000-000000000006', 'anh', 'admin');
+('00000000-0000-0000-0000-000000000001', 'admin', '$2b$10$RavdVfJOezbJoFecE9b.LOTSSe0nS0ZS5hQawKOMBuUgtE53auG9G'),
+('00000000-0000-0000-0000-000000000002', 'vu',    '$2b$10$RavdVfJOezbJoFecE9b.LOTSSe0nS0ZS5hQawKOMBuUgtE53auG9G'),
+('00000000-0000-0000-0000-000000000003', 'vinh',  '$2b$10$RavdVfJOezbJoFecE9b.LOTSSe0nS0ZS5hQawKOMBuUgtE53auG9G'),
+('00000000-0000-0000-0000-000000000004', 'lamvu', '$2b$10$RavdVfJOezbJoFecE9b.LOTSSe0nS0ZS5hQawKOMBuUgtE53auG9G'),
+('00000000-0000-0000-0000-000000000005', 'minh',  '$2b$10$RavdVfJOezbJoFecE9b.LOTSSe0nS0ZS5hQawKOMBuUgtE53auG9G'),
+('00000000-0000-0000-0000-000000000006', 'anh',   '$2b$10$RavdVfJOezbJoFecE9b.LOTSSe0nS0ZS5hQawKOMBuUgtE53auG9G');
 
 -- =========================
 -- RESET SESSIONS (30)

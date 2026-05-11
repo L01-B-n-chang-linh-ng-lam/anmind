@@ -18,6 +18,7 @@
 * [Business Rules](#business-rules)
 * [Technology Stack](#technology-stack)
 * [System Architecture](#system-architecture)
+* [Getting Started](#getting-started)
 * [Project Structure](#project-structure)
 * [API Overview](#api-overview)
 * [Database Overview](#database-overview)
@@ -297,8 +298,8 @@ score_after - score_before
 
 ## MVP Rules
 
-1. Passwords are stored in plain text for demonstration only.
-2. Production systems must use secure password hashing.
+1. Passwords are hashed with bcryptjs.
+2. JWT tokens expire — clients must handle re-authentication.
 
 ---
 
@@ -306,21 +307,22 @@ score_after - score_before
 
 ## Mobile Application
 
-* React Native
-* Expo
+* React Native 0.81 / Expo 54
 * TypeScript
-* Expo Router
+* Expo Router (file-based routing)
 * Expo Notifications
 * Expo Haptics
-* AsyncStorage or SQLite
+* AsyncStorage / SQLite (planned — offline session queue)
+* React Native Reanimated (breathing animations)
+* Sentry (crash reporting)
 
 ## Backend
 
-* NestJS
+* NestJS 11 / Node.js 20
 * TypeScript
-* Prisma ORM
-* JWT Authentication
-* Swagger (OpenAPI)
+* Prisma ORM (schema at `backend/prisma/schema.prisma`)
+* Passport JWT + bcryptjs
+* Swagger (OpenAPI) — available at `/api-docs`
 
 ## Database
 
@@ -360,12 +362,42 @@ React Native Mobile App
 
 ---
 
+# Getting Started
+
+## Prerequisites
+
+* Node.js 20
+* PostgreSQL (local or remote)
+* [Expo CLI](https://docs.expo.dev/get-started/installation/)
+
+## Backend Setup
+
+```bash
+cd backend
+cp .env.example .env          # fill in DATABASE_URL, JWT_SECRET, Agora keys
+npm install
+npx prisma migrate dev        # create tables and generate Prisma client
+npm run start:dev             # http://localhost:8080
+```
+
+## Mobile Setup
+
+```bash
+cd mobile
+npm install
+npm start                     # choose platform from Expo dev menu
+```
+
+---
+
 # Project Structure
 
 ```text
 project-root/
 ├── mobile/
 ├── backend/
+│   └── prisma/
+│       └── schema.prisma
 ├── database/
 │   ├── init.sql
 │   └── seed.sql
@@ -386,11 +418,15 @@ project-root/
 ### Reset
 
 * `POST /reset`
-* `GET /reset/history`
+
+### History
+
+* `GET /history`
 
 ### Analytics
 
-* `GET /analytics`
+* `GET /analytics/summary`
+* `GET /analytics/trend`
 
 ### Sync
 
@@ -477,11 +513,10 @@ project-root/
 ## CI/CD Pipeline
 
 ```text
-Push to main
-→ Run Tests
+Push to develop
+→ Run Tests (backend + mobile)
 → Measure Coverage
 → SonarCloud Analysis
-→ Deploy Backend
 ```
 
 ## Hosting Requirement
