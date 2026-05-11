@@ -16,6 +16,6 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: ./app
-          file: ./app/Dockerfile
+          file: ./backend/Dockerfile
           push: false
-          tags: app:pr-${{ github.sha }}
+          tags: backend:pr-${{ github.sha }}

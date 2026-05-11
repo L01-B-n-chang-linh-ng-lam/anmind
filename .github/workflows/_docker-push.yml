@@ -53,7 +53,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: ./app
-          file: ./app/Dockerfile
+          file: ./backend/Dockerfile
           push: true
           tags: |
             ${{ inputs.acr-login-server }}/${{ inputs.image-name }}:sha-${{ github.sha }}

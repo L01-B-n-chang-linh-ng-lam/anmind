@@ -21,7 +21,7 @@ jobs:
           filters: |
             app:
               - 'app/**'
-              - 'app/Dockerfile'
+              - 'backend/Dockerfile'
               - '.github/workflows/**'
               - '.github/actions/**'
 
