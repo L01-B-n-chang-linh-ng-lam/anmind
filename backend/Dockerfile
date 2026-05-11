@@ -4,7 +4,7 @@
 # =============================================================================
 FROM node:24-alpine AS development
 
-WORKDIR /usr/src/app
+WORKDIR /usr/src/backend
 
 # Copy package files first for better layer caching
 COPY package*.json ./
@@ -25,7 +25,7 @@ CMD ["npm", "run", "start:dev"]
 # =============================================================================
 FROM node:24-alpine AS build
 
-WORKDIR /app
+WORKDIR /backend
 
 COPY package*.json ./
 RUN npm ci --legacy-peer-deps
@@ -47,12 +47,12 @@ FROM node:24-alpine AS production
 RUN addgroup -g 1001 -S nodejs && \
     adduser -S nestjs -u 1001 -G nodejs
 
-WORKDIR /app
+WORKDIR /backend
 
 # Copy only production dependencies and compiled code
-COPY --from=build --chown=nestjs:nodejs /app/node_modules ./node_modules
-COPY --from=build --chown=nestjs:nodejs /app/dist ./dist
-COPY --from=build --chown=nestjs:nodejs /app/package.json ./
+COPY --from=build --chown=nestjs:nodejs /backend/node_modules ./node_modules
+COPY --from=build --chown=nestjs:nodejs /backend/dist ./dist
+COPY --from=build --chown=nestjs:nodejs /backend/package.json ./
 
 USER nestjs
 
