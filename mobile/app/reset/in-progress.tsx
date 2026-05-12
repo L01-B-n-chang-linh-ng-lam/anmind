@@ -5,6 +5,8 @@ import { useEffect, useRef, useState } from 'react';
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import BreathingOrb from '@/components/BreathingOrb';
+import { useAmbientSound } from '@/hooks/useAmbientSound';
+import { useBreathingAudio } from '@/hooks/useBreathingAudio';
 import { useResetStore } from '@/store/resetStore';
 import { useSettingsStore } from '@/store/settingsStore';
 
@@ -35,8 +37,12 @@ export default function ResetInProgressScreen() {
   const phaseRef = useRef(phase);
   phaseRef.current = phase;
 
+  const { playInhale, playExhale } = useBreathingAudio(settings.resetSoundEnabled);
+  useAmbientSound(settings.ambientSound);
+
   // Breathing phase cycle
   useEffect(() => {
+    playInhale();
     const cycle = () => {
       const cur = phaseRef.current;
       if (cur === 'inhale') {
@@ -46,11 +52,13 @@ export default function ResetInProgressScreen() {
         }
         return setTimeout(() => {
           setPhase('exhale');
+          playExhale();
           if (settings.hapticFeedbackEnabled) {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
           }
           setTimeout(() => {
             setPhase('inhale');
+            playInhale();
             if (settings.hapticFeedbackEnabled) {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             }
@@ -63,26 +71,22 @@ export default function ResetInProgressScreen() {
 
     const t = setTimeout(cycle, inhale);
     return () => clearTimeout(t);
-  }, [inhale, hold, exhale, settings.hapticFeedbackEnabled]);
+  }, [inhale, hold, exhale, settings.hapticFeedbackEnabled, settings.resetSoundEnabled]);
 
   // Countdown timer
   useEffect(() => {
-    if (timeRemaining <= 0) {
-      router.replace('/reset/end');
-      return;
-    }
     const interval = setInterval(() => {
-      setTimeRemaining((t) => {
-        if (t <= 1) {
-          clearInterval(interval);
-          router.replace('/reset/end');
-          return 0;
-        }
-        return t - 1;
-      });
+      setTimeRemaining((t) => Math.max(0, t - 1));
     }, 1000);
     return () => clearInterval(interval);
   }, []);
+
+  // Navigate when time is up — kept separate so router.replace is never called inside a state updater
+  useEffect(() => {
+    if (timeRemaining <= 0) {
+      router.replace('/reset/end');
+    }
+  }, [timeRemaining]);
 
   function handleClose() {
     Alert.alert(

@@ -49,7 +49,8 @@
         }
       ],
       "expo-web-browser",
-      "@sentry/react-native"
+      "expo-audio",
+      "@react-native-community/datetimepicker"
     ],
     "experiments": {
       "typedRoutes": true,

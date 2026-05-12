@@ -1,12 +1,26 @@
 import { Ionicons } from '@expo/vector-icons';
+import DateTimePicker, { type DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { useRouter } from 'expo-router';
 import { useEffect } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { Alert, Platform, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useSettingsStore } from '@/store/settingsStore';
 import { clearAll } from '@/services/storage.service';
 import * as reminderService from '@/services/reminder.service';
 import type { AppSettings } from '@/types';
+
+function timeStringToDate(time: string): Date {
+  const [h, m] = time.split(':').map(Number);
+  const d = new Date();
+  d.setHours(h, m, 0, 0);
+  return d;
+}
+
+function dateToTimeString(date: Date): string {
+  const h = date.getHours().toString().padStart(2, '0');
+  const m = date.getMinutes().toString().padStart(2, '0');
+  return `${h}:${m}`;
+}
 
 function ToggleRow({
   label,
@@ -69,6 +83,19 @@ export default function SettingsScreen() {
   useEffect(() => {
     loadSettings();
   }, []);
+
+  async function handleReminderTimeChange(
+    _event: DateTimePickerEvent,
+    date?: Date,
+  ) {
+    if (!date) return;
+    const newTime = dateToTimeString(date);
+    await updateSetting('reminderTime', newTime);
+    if (settings.reminderEnabled) {
+      await reminderService.cancelAllReminders();
+      await reminderService.scheduleReminder(newTime);
+    }
+  }
 
   async function handleReminderToggle(value: boolean) {
     if (value) {
@@ -189,6 +216,16 @@ export default function SettingsScreen() {
                   <Text style={styles.rowLabel}>Reminder Time</Text>
                   <Text style={styles.rowValue}>{settings.reminderTime}</Text>
                 </View>
+                <DateTimePicker
+                  value={timeStringToDate(settings.reminderTime)}
+                  mode="time"
+                  display="spinner"
+                  onChange={handleReminderTimeChange}
+                  textColor="#FFFFFF"
+                  themeVariant="dark"
+                  style={styles.timePicker}
+                  {...(Platform.OS === 'android' && { is24Hour: true })}
+                />
               </>
             )}
           </View>
@@ -325,4 +362,5 @@ const styles = StyleSheet.create({
   segBtnActive: { backgroundColor: '#8E97FD' },
   segBtnText:       { color: '#9CA3AF', fontSize: 13, fontWeight: '500' },
   segBtnTextActive: { color: '#1C0A3E', fontWeight: '700' },
+  timePicker: { width: '100%', backgroundColor: '#1A1F35' },
 });

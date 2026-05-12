@@ -2,23 +2,52 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { BarChart } from 'react-native-chart-kit';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useAuthStore } from '@/store/authStore';
-import { useSettingsStore } from '@/store/settingsStore';
+import SessionCard from '@/components/SessionCard';
 import { STORAGE_KEYS } from '@/services/storage.service';
+import { useAnalyticsStore } from '@/store/analyticsStore';
+import { useAuthStore } from '@/store/authStore';
+import { useResetStore } from '@/store/resetStore';
+import { useSettingsStore } from '@/store/settingsStore';
+
+const DAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+const CHART_CONFIG = {
+  backgroundColor: '#1A1F35',
+  backgroundGradientFrom: '#1A1F35',
+  backgroundGradientTo: '#1A1F35',
+  decimalPlaces: 0,
+  color: () => '#8E97FD',
+  labelColor: () => '#9CA3AF',
+  barPercentage: 0.6,
+  propsForBackgroundLines: { stroke: '#252B45' },
+};
 
 export default function ProfileScreen() {
   const router = useRouter();
+  const { width } = useWindowDimensions();
+  const chartWidth = width - 48;
+
   const { user, isAuthenticated, logout } = useAuthStore();
   const settings = useSettingsStore((s) => s.settings);
   const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
+
+  const { streak, totalSessions, avgImprovement, weeklyData, computeAnalytics } =
+    useAnalyticsStore();
+  const sessions = useResetStore((s) => s.sessions);
 
   useEffect(() => {
     AsyncStorage.getItem(STORAGE_KEYS.TOPICS).then((raw) => {
       if (raw) setSelectedTopics(JSON.parse(raw));
     });
+    computeAnalytics();
   }, []);
+
+  const recentSessions = [...sessions]
+    .sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime())
+    .slice(0, 5);
 
   async function handleLogout() {
     Alert.alert('Log Out', 'Are you sure you want to log out?', [
@@ -44,12 +73,21 @@ export default function ProfileScreen() {
 
   return (
     <View style={styles.root}>
-      <View style={[styles.ambientGlow, styles.ambientLeft]} />
+      <View style={styles.ambientGlow} />
       <SafeAreaView style={styles.safe}>
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scroll}>
-          <Text style={styles.heading}>Profile</Text>
+          <View style={styles.headerRow}>
+            <Text style={styles.heading}>Profile</Text>
+            <Pressable
+              onPress={() => router.push('/settings')}
+              style={styles.settingsBtn}
+              accessibilityRole="button"
+              accessibilityLabel="Settings">
+              <Ionicons name="settings-outline" size={22} color="#9CA3AF" />
+            </Pressable>
+          </View>
 
           {/* Avatar + name */}
           <View style={styles.avatarRow}>
@@ -76,6 +114,51 @@ export default function ProfileScreen() {
                 ))}
               </View>
             </View>
+          )}
+
+          {/* Progress stats */}
+          <Text style={styles.sectionLabel}>Your Progress</Text>
+          <View style={styles.statsRow}>
+            <View style={styles.statCard}>
+              <Text style={styles.statIcon}>🔥</Text>
+              <Text style={styles.statValue}>{streak}</Text>
+              <Text style={styles.statLabel}>Day Streak</Text>
+            </View>
+            <View style={styles.statCard}>
+              <Text style={styles.statIcon}>🧘</Text>
+              <Text style={styles.statValue}>{totalSessions}</Text>
+              <Text style={styles.statLabel}>Sessions</Text>
+            </View>
+            <View style={styles.statCard}>
+              <Text style={styles.statIcon}>📈</Text>
+              <Text style={styles.statValue}>+{avgImprovement.toFixed(1)}</Text>
+              <Text style={styles.statLabel}>Avg Mood</Text>
+            </View>
+          </View>
+
+          <Text style={styles.sectionLabel}>This Week</Text>
+          <View style={styles.chartCard}>
+            <BarChart
+              data={{
+                labels: DAY_LABELS,
+                datasets: [{ data: weeklyData.length === 7 ? weeklyData : [0,0,0,0,0,0,0] }],
+              }}
+              width={chartWidth}
+              height={160}
+              chartConfig={CHART_CONFIG}
+              style={styles.chart}
+              showValuesOnTopOfBars
+              fromZero
+              yAxisLabel=""
+              yAxisSuffix=""
+            />
+          </View>
+
+          <Text style={styles.sectionLabel}>Recent Sessions</Text>
+          {recentSessions.length === 0 ? (
+            <Text style={styles.emptyText}>No sessions yet. Start your first reset!</Text>
+          ) : (
+            recentSessions.map((s) => <SessionCard key={s.id} session={s} />)
           )}
 
           {/* Reminder summary */}
@@ -135,12 +218,25 @@ const styles = StyleSheet.create({
   },
   safe:   { flex: 1 },
   scroll: { paddingHorizontal: 24, paddingBottom: 32 },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 24,
+    marginBottom: 24,
+  },
   heading: {
     color: '#FFFFFF',
     fontSize: 26,
     fontWeight: '700',
-    marginTop: 24,
-    marginBottom: 24,
+  },
+  settingsBtn: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: '#1A1F35',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   avatarRow: {
     flexDirection: 'row',
@@ -189,6 +285,38 @@ const styles = StyleSheet.create({
   topicChipText: { color: '#8E97FD', fontSize: 13, fontWeight: '600' },
   infoRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   infoText: { color: '#FFFFFF', fontSize: 14 },
+  sectionLabel: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 14,
+    marginTop: 4,
+  },
+  statsRow: { flexDirection: 'row', gap: 10, marginBottom: 20 },
+  statCard: {
+    flex: 1,
+    backgroundColor: '#1A1F35',
+    borderRadius: 14,
+    padding: 14,
+    alignItems: 'center',
+    gap: 4,
+  },
+  statIcon:  { fontSize: 22 },
+  statValue: { color: '#FFFFFF', fontSize: 20, fontWeight: '700' },
+  statLabel: { color: '#9CA3AF', fontSize: 11, textAlign: 'center' },
+  chartCard: {
+    backgroundColor: '#1A1F35',
+    borderRadius: 16,
+    overflow: 'hidden',
+    marginBottom: 20,
+  },
+  chart: { borderRadius: 16 },
+  emptyText: {
+    color: '#9CA3AF',
+    textAlign: 'center',
+    marginBottom: 20,
+    lineHeight: 22,
+  },
   loginBtn: {
     backgroundColor: '#8E97FD',
     borderRadius: 14,

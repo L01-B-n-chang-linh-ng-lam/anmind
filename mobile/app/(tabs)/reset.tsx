@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import DurationSelector from '@/components/DurationSelector';
@@ -20,6 +20,10 @@ export default function ResetStartScreen() {
   const [duration, setDuration] = useState<3 | 5 | 7 | 10>(
     settings.defaultResetDuration,
   );
+
+  useEffect(() => {
+    setDuration(settings.defaultResetDuration);
+  }, [settings.defaultResetDuration]);
 
   const canStart = moodBefore !== null;
 

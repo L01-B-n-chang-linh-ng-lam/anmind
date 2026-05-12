@@ -27,7 +27,7 @@ export default function ResetEndScreen() {
       scoreAfter: moodAfter ? MOOD_SCORES[moodAfter] : undefined,
     };
     await addSession(session);
-    router.replace('/progress');
+    router.replace('/(tabs)/profile');
   }
 
   const improvement =

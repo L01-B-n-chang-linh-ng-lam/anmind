@@ -69,13 +69,6 @@ export default function HomeScreen() {
               Take a moment to check in with yourself.
             </Text>
           </View>
-          <Pressable
-            onPress={() => router.push('/settings')}
-            accessibilityRole="button"
-            accessibilityLabel="Settings"
-            testID="settings-btn">
-            <Ionicons name="settings-outline" size={22} color="#9CA3AF" />
-          </Pressable>
         </View>
 
         {/* Breathing orb — tapping starts a reset */}
@@ -107,7 +100,7 @@ export default function HomeScreen() {
                 if (item.testID === 'action-meditation') {
                   router.push('/(tabs)/community');
                 } else {
-                  router.push('/progress');
+                  router.push('/(tabs)/profile');
                 }
               }}>
               <View style={styles.actionIconBox}>
