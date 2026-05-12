@@ -1,12 +1,13 @@
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker, { type DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { useRouter } from 'expo-router';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Alert, Platform, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useSettingsStore } from '@/store/settingsStore';
 import { clearAll } from '@/services/storage.service';
 import * as reminderService from '@/services/reminder.service';
+import { trackReminderDisabled, trackReminderEnabled, trackSettingsOpened } from '@/services/tracking.service';
 import type { AppSettings } from '@/types';
 
 function timeStringToDate(time: string): Date {
@@ -79,15 +80,18 @@ function SegmentRow<T extends string>({
 export default function SettingsScreen() {
   const router = useRouter();
   const { settings, loadSettings, updateSetting, resetToDefaults } = useSettingsStore();
+  const [showTimePicker, setShowTimePicker] = useState(false);
 
   useEffect(() => {
     loadSettings();
+    trackSettingsOpened();
   }, []);
 
   async function handleReminderTimeChange(
     _event: DateTimePickerEvent,
     date?: Date,
   ) {
+    setShowTimePicker(false);
     if (!date) return;
     const newTime = dateToTimeString(date);
     await updateSetting('reminderTime', newTime);
@@ -108,8 +112,10 @@ export default function SettingsScreen() {
         return;
       }
       await reminderService.scheduleReminder(settings.reminderTime);
+      trackReminderEnabled(settings.reminderTime);
     } else {
       await reminderService.cancelAllReminders();
+      trackReminderDisabled();
     }
     await updateSetting('reminderEnabled', value);
   }
@@ -212,20 +218,32 @@ export default function SettingsScreen() {
             {settings.reminderEnabled && (
               <>
                 <View style={styles.divider} />
-                <View style={styles.row}>
+                <Pressable
+                  style={styles.row}
+                  onPress={() => setShowTimePicker((v) => !v)}
+                  accessibilityRole="button">
                   <Text style={styles.rowLabel}>Reminder Time</Text>
-                  <Text style={styles.rowValue}>{settings.reminderTime}</Text>
-                </View>
-                <DateTimePicker
-                  value={timeStringToDate(settings.reminderTime)}
-                  mode="time"
-                  display="spinner"
-                  onChange={handleReminderTimeChange}
-                  textColor="#FFFFFF"
-                  themeVariant="dark"
-                  style={styles.timePicker}
-                  {...(Platform.OS === 'android' && { is24Hour: true })}
-                />
+                  <View style={styles.reminderTimeRight}>
+                    <Text style={styles.rowValue}>{settings.reminderTime}</Text>
+                    <Ionicons
+                      name={showTimePicker ? 'chevron-up' : 'chevron-down'}
+                      size={16}
+                      color="#9CA3AF"
+                    />
+                  </View>
+                </Pressable>
+                {showTimePicker && (
+                  <DateTimePicker
+                    value={timeStringToDate(settings.reminderTime)}
+                    mode="time"
+                    display="spinner"
+                    onChange={handleReminderTimeChange}
+                    textColor="#FFFFFF"
+                    themeVariant="dark"
+                    style={styles.timePicker}
+                    {...(Platform.OS === 'android' && { is24Hour: true })}
+                  />
+                )}
               </>
             )}
           </View>
@@ -362,5 +380,6 @@ const styles = StyleSheet.create({
   segBtnActive: { backgroundColor: '#8E97FD' },
   segBtnText:       { color: '#9CA3AF', fontSize: 13, fontWeight: '500' },
   segBtnTextActive: { color: '#1C0A3E', fontWeight: '700' },
+  reminderTimeRight: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   timePicker: { width: '100%', backgroundColor: '#1A1F35' },
 });

@@ -1,0 +1,34 @@
+{
+  "cli": {
+    "version": ">= 18.5.0",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "channel": "development"
+    },
+    "preview": {
+      "distribution": "internal",
+      "channel": "preview",
+      "env": {
+        "EXPO_PUBLIC_SENTRY_DSN": "https://55c2775aeb7c1fd7b9819963809bcf1c@o4511269962907649.ingest.de.sentry.io/4511351432478800",
+        "EXPO_PUBLIC_ENV": "preview",
+        "EXPO_PUBLIC_API_URL": "https://ca-anmind-dev.whiteplant-3359c7c1.eastasia.azurecontainerapps.io"
+      }
+    },
+    "production": {
+      "autoIncrement": true,
+      "channel": "production",
+      "env": {
+        "EXPO_PUBLIC_SENTRY_DSN": "https://55c2775aeb7c1fd7b9819963809bcf1c@o4511269962907649.ingest.de.sentry.io/4511351432478800",
+        "EXPO_PUBLIC_ENV": "production",
+        "EXPO_PUBLIC_API_URL": "https://ca-anmind-prod.whiteplant-3359c7c1.eastasia.azurecontainerapps.io"
+      }
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}

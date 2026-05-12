@@ -2,18 +2,15 @@ import 'react-native-get-random-values';
 import 'react-native-reanimated';
 
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import * as Sentry from '@sentry/react-native';
 import { setAudioModeAsync } from 'expo-audio';
-import { Stack } from 'expo-router';
+import { Stack, useNavigationContainerRef } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
+import { Platform } from 'react-native';
 
+import { navigationIntegration } from '@/lib/sentry';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import * as Sentry from '@sentry/react-native';
-
-Sentry.init({
-  dsn: 'https://55c2775aeb7c1fd7b9819963809bcf1c@o4511269962907649.ingest.de.sentry.io/4511351432478800',
-  sendDefaultPii: true,
-});
 
 export const unstable_settings = {
   anchor: 'index',
@@ -21,8 +18,11 @@ export const unstable_settings = {
 
 export default Sentry.wrap(function RootLayout() {
   const colorScheme = useColorScheme();
+  const navigationRef = useNavigationContainerRef();
 
   useEffect(() => {
+    navigationIntegration.registerNavigationContainer(navigationRef);
+    Sentry.setTags({ app: 'anmind-mobile', platform: Platform.OS });
     setAudioModeAsync({
       playsInSilentMode: true,
       interruptionMode: 'duckOthers',

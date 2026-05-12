@@ -85,15 +85,215 @@ VALUES
 ('20000000-0000-0000-0000-000000000053','10000000-0000-0000-0000-000000000604',5,5),
 ('20000000-0000-0000-0000-000000000054','10000000-0000-0000-0000-000000000605',5,5);
 
-INSERT INTO meditation_session (id, title, description, start_time, duration_minutes, meet_link)
+-- =====================================
+-- MEDITATION SESSIONS (Agora-enabled)
+-- =====================================
+INSERT INTO meditation_session (
+    id,
+    title,
+    description,
+    host_user_id,
+    start_time,
+    duration_minutes,
+    channel_name,
+    rtc_token,
+    status,
+    max_participants
+)
 VALUES
-('30000000-0000-0000-0000-000000000001','Morning Reset','Start calm',NOW()+INTERVAL '1 hour',10,'https://meet.google.com/a1'),
-('30000000-0000-0000-0000-000000000002','Focus Reset','Deep work',NOW()+INTERVAL '2 hour',15,'https://meet.google.com/a2'),
-('30000000-0000-0000-0000-000000000003','Quick Reset','Short break',NOW()+INTERVAL '3 hour',5,'https://meet.google.com/a3'),
-('30000000-0000-0000-0000-000000000004','Breathing','Relax',NOW()+INTERVAL '4 hour',10,'https://meet.google.com/a4'),
-('30000000-0000-0000-0000-000000000005','Midday Calm','Recharge',NOW()+INTERVAL '5 hour',5,'https://meet.google.com/a5'),
-('30000000-0000-0000-0000-000000000006','Deep Calm','Reduce stress',NOW()+INTERVAL '6 hour',12,'https://meet.google.com/a6'),
-('30000000-0000-0000-0000-000000000007','Evening Reset','Wind down',NOW()+INTERVAL '7 hour',10,'https://meet.google.com/a7'),
-('30000000-0000-0000-0000-000000000008','Stress Release','Relax',NOW()+INTERVAL '8 hour',15,'https://meet.google.com/a8'),
-('30000000-0000-0000-0000-000000000009','Night Calm','Sleep prep',NOW()+INTERVAL '9 hour',10,'https://meet.google.com/a9'),
-('30000000-0000-0000-0000-000000000010','Sleep Reset','Deep sleep',NOW()+INTERVAL '10 hour',10,'https://meet.google.com/a10');
+(
+    '30000000-0000-0000-0000-000000000001',
+    'Morning Reset',
+    'Start your day with calm and clarity.',
+    '00000000-0000-0000-0000-000000000001', -- admin
+    NOW() + INTERVAL '1 day',
+    129600, -- 90 days in minutes
+    'morning-reset-001',
+    NULL,
+    'scheduled',
+    100
+),
+(
+    '30000000-0000-0000-0000-000000000002',
+    'Focus Reset',
+    'Meditation session for deep work preparation.',
+    '00000000-0000-0000-0000-000000000002', -- vu
+    NOW() + INTERVAL '2 days',
+    15,
+    'focus-reset-002',
+    NULL,
+    'scheduled',
+    50
+),
+(
+    '30000000-0000-0000-0000-000000000003',
+    'Quick Reset',
+    'A short session to recharge in five minutes.',
+    '00000000-0000-0000-0000-000000000003', -- vinh
+    NOW() + INTERVAL '3 days',
+    5,
+    'quick-reset-003',
+    NULL,
+    'scheduled',
+    30
+),
+(
+    '30000000-0000-0000-0000-000000000004',
+    'Evening Reset',
+    'Wind down and release stress before sleep.',
+    '00000000-0000-0000-0000-000000000001', -- admin
+    NOW() + INTERVAL '4 days',
+    20,
+    'evening-reset-004',
+    NULL,
+    'scheduled',
+    100
+),
+(
+    '30000000-0000-0000-0000-000000000005',
+    'Live Deep Calm',
+    'Currently active livestream meditation.',
+    '00000000-0000-0000-0000-000000000004', -- lamvu
+    NOW() - INTERVAL '1 day',
+    30,
+    'deep-calm-live-005',
+    NULL,
+    'live',
+    200
+),
+(
+    '30000000-0000-0000-0000-000000000006',
+    'Completed Sleep Reset',
+    'Archived meditation session.',
+    '00000000-0000-0000-0000-000000000005', -- minh
+    NOW() - INTERVAL '3 days',
+    15,
+    'sleep-reset-006',
+    NULL,
+    'ended',
+    100
+);
+
+-- =====================================
+-- USER MEDITATION SESSION
+-- =====================================
+INSERT INTO user_meditation_session (
+    id,
+    user_id,
+    meditation_session_id,
+    role,
+    joined_at,
+    left_at,
+    completed
+)
+VALUES
+-- Session 1: Morning Reset (scheduled)
+(
+    '40000000-0000-0000-0000-000000000001',
+    '00000000-0000-0000-0000-000000000001', -- admin
+    '30000000-0000-0000-0000-000000000001',
+    'host',
+    NOW() + INTERVAL '1 day',
+    NULL,
+    FALSE
+),
+(
+    '40000000-0000-0000-0000-000000000002',
+    '00000000-0000-0000-0000-000000000002', -- vu
+    '30000000-0000-0000-0000-000000000001',
+    'audience',
+    NOW() + INTERVAL '1 day',
+    NULL,
+    FALSE
+),
+(
+    '40000000-0000-0000-0000-000000000003',
+    '00000000-0000-0000-0000-000000000003', -- vinh
+    '30000000-0000-0000-0000-000000000001',
+    'audience',
+    NOW() + INTERVAL '1 day',
+    NULL,
+    FALSE
+),
+
+-- Session 5: Live Deep Calm
+(
+    '40000000-0000-0000-0000-000000000004',
+    '00000000-0000-0000-0000-000000000004', -- lamvu
+    '30000000-0000-0000-0000-000000000005',
+    'host',
+    NOW() - INTERVAL '1 day',
+    NULL,
+    FALSE
+),
+(
+    '40000000-0000-0000-0000-000000000005',
+    '00000000-0000-0000-0000-000000000001', -- admin
+    '30000000-0000-0000-0000-000000000005',
+    'audience',
+    NOW() - INTERVAL '1 day',
+    NULL,
+    FALSE
+),
+(
+    '40000000-0000-0000-0000-000000000006',
+    '00000000-0000-0000-0000-000000000006', -- anh
+    '30000000-0000-0000-0000-000000000005',
+    'audience',
+    NOW() - INTERVAL '1 day',
+    NULL,
+    FALSE
+),
+
+-- Session 6: Completed Sleep Reset
+(
+    '40000000-0000-0000-0000-000000000007',
+    '00000000-0000-0000-0000-000000000005', -- minh
+    '30000000-0000-0000-0000-000000000006',
+    'host',
+    NOW() - INTERVAL '3 days',
+    NOW() - INTERVAL '3 days' + INTERVAL '15 minutes',
+    TRUE
+),
+(
+    '40000000-0000-0000-0000-000000000008',
+    '00000000-0000-0000-0000-000000000002', -- vu
+    '30000000-0000-0000-0000-000000000006',
+    'audience',
+    NOW() - INTERVAL '3 days',
+    NOW() - INTERVAL '3 days' + INTERVAL '15 minutes',
+    TRUE
+);
+
+-- =====================================
+-- AGORA TOKEN LOG
+-- =====================================
+INSERT INTO agora_token_log (
+    id,
+    user_id,
+    meditation_session_id,
+    role,
+    token_expire_at
+)
+VALUES
+(
+    '50000000-0000-0000-0000-000000000001',
+    '00000000-0000-0000-0000-000000000004', -- lamvu
+    '30000000-0000-0000-0000-000000000005',
+    'host',
+    NOW() + INTERVAL '1 day'
+),
+(
+    '50000000-0000-0000-0000-000000000002',
+    '00000000-0000-0000-0000-000000000001', -- admin
+    '30000000-0000-0000-0000-000000000005',
+    'audience',
+    NOW() + INTERVAL '1 day'
+),
+(
+    '50000000-0000-0000-0000-000000000003',
+    '00000000-0000-0000-0000-000000000006', -- anh
+    '30000000-0000-0000-0000-000000000005',
+    'audience',
+    NOW() + INTERVAL '1 day'
+);

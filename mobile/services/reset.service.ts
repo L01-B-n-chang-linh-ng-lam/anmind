@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/react-native';
 import type { ResetSession } from '@/types';
 import { getItem, setItem, STORAGE_KEYS } from './storage.service';
 
@@ -6,9 +7,11 @@ export async function getSessions(): Promise<ResetSession[]> {
 }
 
 export async function addSession(session: ResetSession): Promise<void> {
-  const sessions = await getSessions();
-  sessions.push(session);
-  await setItem(STORAGE_KEYS.SESSIONS, sessions);
+  return Sentry.startSpan({ name: 'storage.addSession', op: 'db' }, async () => {
+    const sessions = await getSessions();
+    sessions.push(session);
+    await setItem(STORAGE_KEYS.SESSIONS, sessions);
+  });
 }
 
 export async function updateSession(

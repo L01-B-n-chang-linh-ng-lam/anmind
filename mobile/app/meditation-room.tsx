@@ -18,6 +18,7 @@ import {
   MockMeditationRoomService,
   type MeditationRoomService,
 } from '@/services/meditation-room.service';
+import { trackMeditationSessionJoined } from '@/services/tracking.service';
 import { useMeditationStore } from '@/store/meditationStore';
 
 const REACTION_EMOJIS = ['🙏', '❤️', '✨', '🌊', '🌿'];
@@ -84,6 +85,7 @@ export default function MeditationRoomScreen() {
 
   useEffect(() => {
     serviceRef.current.join(sessionId ?? '');
+    trackMeditationSessionJoined(sessionId ?? '');
     const cleanup = serviceRef.current.onParticipantCountChange((count) => {
       setParticipantCount(count);
     });

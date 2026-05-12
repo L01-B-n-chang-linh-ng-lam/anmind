@@ -7,6 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import BreathingOrb from '@/components/BreathingOrb';
 import { useAmbientSound } from '@/hooks/useAmbientSound';
 import { useBreathingAudio } from '@/hooks/useBreathingAudio';
+import { trackResetAbandoned, trackResetStarted } from '@/services/tracking.service';
 import { useResetStore } from '@/store/resetStore';
 import { useSettingsStore } from '@/store/settingsStore';
 
@@ -42,6 +43,7 @@ export default function ResetInProgressScreen() {
 
   // Breathing phase cycle
   useEffect(() => {
+    trackResetStarted(currentSession?.durationMinutes ?? 5, currentSession?.scoreBefore);
     playInhale();
     const cycle = () => {
       const cur = phaseRef.current;
@@ -94,7 +96,7 @@ export default function ResetInProgressScreen() {
       'Are you sure you want to end this session early?',
       [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'End Session', style: 'destructive', onPress: () => router.back() },
+        { text: 'End Session', style: 'destructive', onPress: () => { trackResetAbandoned(timeRemaining); router.back(); } },
       ],
     );
   }

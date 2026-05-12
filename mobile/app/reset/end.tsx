@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import MoodSelector from '@/components/MoodSelector';
+import SatisfactionSurvey from '@/components/SatisfactionSurvey';
+import { trackResetCompleted } from '@/services/tracking.service';
 import { useResetStore } from '@/store/resetStore';
 import type { MoodLabel, ResetSession } from '@/types';
 import { MOOD_SCORES } from '@/types';
@@ -13,6 +15,7 @@ export default function ResetEndScreen() {
   const router = useRouter();
   const { currentSession, addSession } = useResetStore();
   const [moodAfter, setMoodAfter] = useState<MoodLabel | null>(null);
+  const [showSurvey, setShowSurvey] = useState(false);
 
   const canEnd = moodAfter !== null;
 
@@ -27,7 +30,13 @@ export default function ResetEndScreen() {
       scoreAfter: moodAfter ? MOOD_SCORES[moodAfter] : undefined,
     };
     await addSession(session);
-    router.replace('/(tabs)/profile');
+    trackResetCompleted(session.durationMinutes, session.scoreBefore, session.scoreAfter);
+    const completedCount = useResetStore.getState().sessions.filter((s) => s.completed).length;
+    if (completedCount % 5 === 0) {
+      setShowSurvey(true);
+    } else {
+      router.replace('/(tabs)/profile');
+    }
   }
 
   const improvement =
@@ -87,6 +96,14 @@ export default function ResetEndScreen() {
           </Pressable>
         </ScrollView>
       </SafeAreaView>
+
+      <SatisfactionSurvey
+        visible={showSurvey}
+        onClose={() => {
+          setShowSurvey(false);
+          router.replace('/(tabs)/profile');
+        }}
+      />
     </View>
   );
 }

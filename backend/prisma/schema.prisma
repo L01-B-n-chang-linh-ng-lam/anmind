@@ -15,13 +15,14 @@ model User {
 
   resetSessions          ResetSession[]
   userMeditationSessions UserMeditationSession[]
+  hostedMeditationSessions MeditationSession[] @relation("HostedSessions")
+  agoraTokenLogs         AgoraTokenLog[]
 
   @@map("user")
 }
 
 model ResetSession {
   id              String    @id @default(uuid()) @db.Uuid
-  externalId      String?   @unique @map("external_id")
   userId          String?   @db.Uuid @map("user_id")
   durationMinutes Int       @map("duration_minutes")
   startedAt       DateTime  @map("started_at")
@@ -30,14 +31,14 @@ model ResetSession {
   createdAt       DateTime  @default(now()) @map("created_at")
 
   user      User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
-  moodEntry MoodEntry?
+  moodEntries MoodEntry[]
 
   @@map("reset_session")
 }
 
 model MoodEntry {
   id             String   @id @default(uuid()) @db.Uuid
-  resetSessionId String   @unique @db.Uuid @map("reset_session_id")
+  resetSessionId String   @db.Uuid @map("reset_session_id")
   scoreBefore    Int?     @map("score_before")
   scoreAfter     Int?     @map("score_after")
   createdAt      DateTime @default(now()) @map("created_at")
@@ -51,26 +52,65 @@ model MeditationSession {
   id              String   @id @default(uuid()) @db.Uuid
   title           String
   description     String?
+  hostUserId      String   @db.Uuid @map("host_user_id")
   startTime       DateTime @map("start_time")
   durationMinutes Int      @map("duration_minutes")
-  meetLink        String?  @map("meet_link")
+  channelName     String   @unique @map("channel_name")
+  rtcToken        String?  @map("rtc_token")
+  status          MeditationStatus @default(SCHEDULED) @map("status")
+  maxParticipants Int      @default(100) @map("max_participants")
   createdAt       DateTime @default(now()) @map("created_at")
 
   userMeditationSessions UserMeditationSession[]
+  hostUser User @relation("HostedSessions", fields: [hostUserId], references: [id])
+  agoraTokenLogs AgoraTokenLog[]
 
   @@map("meditation_session")
 }
 
 model UserMeditationSession {
   id                  String    @id @default(uuid()) @db.Uuid
-  userId              String?   @db.Uuid @map("user_id")
-  meditationSessionId String?   @db.Uuid @map("meditation_session_id")
+  userId              String    @db.Uuid @map("user_id")
+  meditationSessionId String    @db.Uuid @map("meditation_session_id")
+  role                Role      @default(AUDIENCE)
   joinedAt            DateTime? @map("joined_at")
+  leftAt              DateTime? @map("left_at")
   completed           Boolean   @default(false)
 
-  user              User?              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  meditationSession MeditationSession? @relation(fields: [meditationSessionId], references: [id], onDelete: Cascade)
+  user              User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  meditationSession MeditationSession @relation(fields: [meditationSessionId], references: [id], onDelete: Cascade)
 
   @@unique([userId, meditationSessionId])
   @@map("user_meditation_session")
+}
+
+enum MeditationStatus {
+  SCHEDULED
+  LIVE
+  ENDED
+  CANCELLED
+}
+
+enum Role {
+  HOST
+  AUDIENCE
+}
+
+model AgoraTokenLog {
+  id                  String   @id @default(uuid()) @db.Uuid
+  userId              String   @db.Uuid @map("user_id")
+  meditationSessionId String   @db.Uuid @map("meditation_session_id")
+  role                AgoraRole @map("role")
+  tokenExpireAt       DateTime @map("token_expire_at")
+  issuedAt            DateTime @default(now()) @map("issued_at")
+
+  user              User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  meditationSession MeditationSession @relation(fields: [meditationSessionId], references: [id], onDelete: Cascade)
+
+  @@map("agora_token_log")
+}
+
+enum AgoraRole {
+  HOST
+  AUDIENCE
 }
