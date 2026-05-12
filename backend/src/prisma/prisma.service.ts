@@ -1,6 +1,6 @@
 import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import type { PrismaClient } from '../generated/prisma/client.js';
+import type { PrismaClient } from '@prisma/client';
 
 type Client = InstanceType<typeof PrismaClient>;
 
@@ -11,7 +11,7 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
   constructor(private readonly config: ConfigService) {}
 
   async onModuleInit() {
-    const { PrismaClient: PC } = await import('../generated/prisma/client.js');
+    const { PrismaClient: PC } = await import('@prisma/client');
     const { PrismaPg } = await import('@prisma/adapter-pg');
     const connectionString = this.config.get<string>('DATABASE_URL');
     const adapter = new PrismaPg({ connectionString });
