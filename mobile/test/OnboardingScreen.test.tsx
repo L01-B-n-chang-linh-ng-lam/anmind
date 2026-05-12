@@ -7,6 +7,13 @@ jest.mock('expo-router', () => ({
   useRouter: () => ({ push: mockPush, replace: jest.fn() }),
 }));
 
+jest.mock('@react-native-async-storage/async-storage', () => ({
+  getItem: jest.fn().mockResolvedValue(null),
+  setItem: jest.fn().mockResolvedValue(undefined),
+  removeItem: jest.fn().mockResolvedValue(undefined),
+  multiRemove: jest.fn().mockResolvedValue(undefined),
+}));
+
 jest.mock('expo-image', () => {
   const { View } = require('react-native');
   return {

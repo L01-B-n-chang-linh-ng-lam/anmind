@@ -2,6 +2,8 @@ import { afterEach, describe, expect, it, jest } from '@jest/globals';
 import { render } from '@testing-library/react-native';
 
 // ── Mocks ────────────────────────────────────────────────────────────────────
+jest.mock('react-native-get-random-values', () => {});
+
 jest.mock('@react-navigation/native', () => ({
   DarkTheme: { dark: true, colors: {} },
   DefaultTheme: { dark: false, colors: {} },
@@ -62,12 +64,23 @@ describe('RootLayout', () => {
     expect(getByTestId('stack-navigator')).toBeTruthy();
   });
 
-  it('renders all four Stack.Screen entries', () => {
+  it('renders core Stack.Screen entries', () => {
     const { getByTestId } = render(<RootLayout />);
     expect(getByTestId('screen-index')).toBeTruthy();
     expect(getByTestId('screen-choose-topic')).toBeTruthy();
-    expect(getByTestId('screen-home')).toBeTruthy();
+    expect(getByTestId('screen-(tabs)')).toBeTruthy();
     expect(getByTestId('screen-modal')).toBeTruthy();
+  });
+
+  it('renders new screen entries for auth and reset flows', () => {
+    const { getByTestId } = render(<RootLayout />);
+    expect(getByTestId('screen-auth/login')).toBeTruthy();
+    expect(getByTestId('screen-auth/signup')).toBeTruthy();
+    expect(getByTestId('screen-reset/in-progress')).toBeTruthy();
+    expect(getByTestId('screen-reset/end')).toBeTruthy();
+    expect(getByTestId('screen-progress')).toBeTruthy();
+    expect(getByTestId('screen-settings')).toBeTruthy();
+    expect(getByTestId('screen-meditation-room')).toBeTruthy();
   });
 
   it('unstable_settings anchors at index', () => {

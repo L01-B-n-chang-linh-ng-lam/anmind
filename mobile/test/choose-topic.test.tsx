@@ -1,10 +1,17 @@
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
-import { fireEvent, render, screen } from '@testing-library/react-native';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 
 // ── Mocks ────────────────────────────────────────────────────────────────────
 const mockReplace = jest.fn();
 jest.mock('expo-router', () => ({
   useRouter: () => ({ push: jest.fn(), replace: mockReplace }),
+}));
+
+jest.mock('@react-native-async-storage/async-storage', () => ({
+  getItem: jest.fn().mockResolvedValue(null),
+  setItem: jest.fn().mockResolvedValue(undefined),
+  removeItem: jest.fn().mockResolvedValue(undefined),
+  multiRemove: jest.fn().mockResolvedValue(undefined),
 }));
 
 jest.mock('expo-image', () => {
@@ -47,10 +54,14 @@ describe('ChooseTopicScreen', () => {
     expect(screen.getByRole('button', { name: label })).toBeTruthy();
   });
 
-  it.each(CARDS)('pressing "$label" navigates to /home', ({ label }) => {
+  it.each(CARDS)('pressing "$label" navigates to /(tabs)', async ({ label }) => {
     render(<ChooseTopicScreen />);
-    fireEvent.press(screen.getByRole('button', { name: label }));
-    expect(mockReplace).toHaveBeenCalledWith('/home');
+    await act(async () => {
+      fireEvent.press(screen.getByRole('button', { name: label }));
+    });
+    await waitFor(() => {
+      expect(mockReplace).toHaveBeenCalledWith('/(tabs)');
+    });
     mockReplace.mockClear();
   });
 

@@ -1,6 +1,9 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
+import { useEffect } from 'react';
 import { Pressable, StyleSheet, View, useWindowDimensions } from 'react-native';
+import { STORAGE_KEYS } from '@/services/storage.service';
 
 export default function WelcomeScreen() {
   const router = useRouter();
@@ -11,6 +14,12 @@ export default function WelcomeScreen() {
   const imageHeight = DESIGN_HEIGHT * scale;
   const offsetX = (width - imageWidth) / 2;
   const offsetY = (height - imageHeight) / 2;
+
+  useEffect(() => {
+    AsyncStorage.getItem(STORAGE_KEYS.ONBOARDING).then((done) => {
+      if (done === 'true') router.replace('/(tabs)');
+    });
+  }, []);
 
   return (
     <View style={styles.container}>

@@ -1,6 +1,8 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet, View, useWindowDimensions } from 'react-native';
+import { STORAGE_KEYS } from '@/services/storage.service';
 
 const DESIGN_WIDTH = 430;
 const DESIGN_HEIGHT = 932;
@@ -54,7 +56,11 @@ export default function ChooseTopicScreen() {
             ]}
             accessibilityRole="button"
             accessibilityLabel={card.label}
-            onPress={() => router.replace('/home')}
+            onPress={async () => {
+              await AsyncStorage.setItem(STORAGE_KEYS.TOPICS, JSON.stringify([card.label]));
+              await AsyncStorage.setItem(STORAGE_KEYS.ONBOARDING, 'true');
+              router.replace('/(tabs)');
+            }}
           />
         ))}
       </View>

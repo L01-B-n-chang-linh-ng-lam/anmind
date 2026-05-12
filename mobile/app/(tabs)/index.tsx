@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import { useEffect } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, {
@@ -33,6 +34,7 @@ export const ACTION_ITEMS = [
 ] as const;
 
 export default function HomeScreen() {
+  const router = useRouter();
   const pulseScale = useSharedValue(1);
 
   useEffect(() => {
@@ -45,7 +47,6 @@ export default function HomeScreen() {
     );
   }, []);
 
-  // Only scale — opacity handled via rgba so nested Views don't multiply it.
   const glowStyle = useAnimatedStyle(() => ({
     transform: [{ scale: pulseScale.value }],
   }));
@@ -58,25 +59,40 @@ export default function HomeScreen() {
 
       <SafeAreaView style={styles.safeArea}>
         {/* Header */}
-        <View style={styles.header} testID="home-header">
-          <Text style={styles.title}>
-            How are you feeling{'\n'}right now?
-          </Text>
-          <Text style={styles.subtitle}>
-            Take a moment to check in with yourself.
-          </Text>
+        <View style={styles.topRow}>
+          <View style={styles.avatar} />
+          <View style={styles.header} testID="home-header">
+            <Text style={styles.title}>
+              How are you feeling{'\n'}right now?
+            </Text>
+            <Text style={styles.subtitle}>
+              Take a moment to check in with yourself.
+            </Text>
+          </View>
+          <Pressable
+            onPress={() => router.push('/settings')}
+            accessibilityRole="button"
+            accessibilityLabel="Settings"
+            testID="settings-btn">
+            <Ionicons name="settings-outline" size={22} color="#9CA3AF" />
+          </Pressable>
         </View>
 
-        {/* Breathing orb — rings nested so flex centres each layer */}
-        <View style={styles.orbContainer} testID="orb-container">
+        {/* Breathing orb — tapping starts a reset */}
+        <Pressable
+          style={styles.orbContainer}
+          testID="orb-container-pressable"
+          onPress={() => router.push('/(tabs)/reset')}
+          accessibilityRole="button"
+          accessibilityLabel="Start Reset">
           <Animated.View style={[styles.orbGlowOuter, glowStyle]} testID="orb-glow-outer">
             <View style={styles.orbGlowInner} testID="orb-glow-inner">
               <View style={styles.orb} testID="orb">
-                <Text style={styles.orbLabel}>Reset  Now</Text>
+                <Text style={styles.orbLabel}>Reset{'\n'}Now</Text>
               </View>
             </View>
           </Animated.View>
-        </View>
+        </Pressable>
 
         {/* Action cards */}
         <View style={styles.actions} testID="action-cards">
@@ -86,7 +102,14 @@ export default function HomeScreen() {
               testID={item.testID}
               style={styles.actionCard}
               accessibilityRole="button"
-              accessibilityLabel={item.title}>
+              accessibilityLabel={item.title}
+              onPress={() => {
+                if (item.testID === 'action-meditation') {
+                  router.push('/(tabs)/community');
+                } else {
+                  router.push('/progress');
+                }
+              }}>
               <View style={styles.actionIconBox}>
                 <Ionicons name={item.icon} size={22} color="#8E97FD" />
               </View>
@@ -99,27 +122,6 @@ export default function HomeScreen() {
           ))}
         </View>
       </SafeAreaView>
-
-      {/* Bottom navigation */}
-      <View style={styles.bottomNav} testID="bottom-nav">
-        {NAV_ITEMS.map((item) => (
-          <Pressable
-            key={item.label}
-            testID={`nav-${item.label.toLowerCase()}`}
-            style={styles.navItem}
-            accessibilityRole="button"
-            accessibilityLabel={item.label}>
-            <Ionicons
-              name={item.icon}
-              size={22}
-              color={item.active ? '#8E97FD' : '#9CA3AF'}
-            />
-            <Text style={[styles.navLabel, item.active && styles.navLabelActive]}>
-              {item.label}
-            </Text>
-          </Pressable>
-        ))}
-      </View>
     </View>
   );
 }
@@ -148,31 +150,38 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 24,
   },
-  header: {
+  topRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
     marginTop: 16,
-    alignItems: 'center',
+    gap: 12,
+  },
+  avatar: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: '#1A1F35',
+  },
+  header: {
+    flex: 1,
   },
   title: {
     color: '#FFFFFF',
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: '700',
-    textAlign: 'center',
-    lineHeight: 38,
+    lineHeight: 32,
   },
   subtitle: {
-    marginTop: 10,
+    marginTop: 6,
     color: '#9CA3AF',
-    fontSize: 14,
-    textAlign: 'center',
-    lineHeight: 20,
+    fontSize: 13,
+    lineHeight: 18,
   },
   orbContainer: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  // No `position: absolute` — flex children of orbContainer centre automatically.
-  // rgba colour carries the transparency so nesting doesn't multiply opacities.
   orbGlowOuter: {
     width: 290,
     height: 290,
@@ -207,6 +216,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
     letterSpacing: 1.5,
+    textAlign: 'center',
   },
   actions: {
     gap: 12,
@@ -241,26 +251,5 @@ const styles = StyleSheet.create({
     color: '#9CA3AF',
     fontSize: 12,
     marginTop: 3,
-  },
-  bottomNav: {
-    flexDirection: 'row',
-    backgroundColor: '#FFFFFF',
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: '#E5E7EB',
-    paddingBottom: 20,
-    paddingTop: 10,
-  },
-  navItem: {
-    flex: 1,
-    alignItems: 'center',
-    gap: 4,
-  },
-  navLabel: {
-    fontSize: 11,
-    color: '#9CA3AF',
-  },
-  navLabelActive: {
-    color: '#8E97FD',
-    fontWeight: '600',
   },
 });

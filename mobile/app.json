@@ -39,6 +39,7 @@
           }
         }
       ],
+      "expo-notifications",
       [
         "@sentry/react-native/expo",
         {
@@ -46,7 +47,9 @@
           "project": "anmind",
           "organization": "anmind"
         }
-      ]
+      ],
+      "expo-web-browser",
+      "@sentry/react-native"
     ],
     "experiments": {
       "typedRoutes": true,

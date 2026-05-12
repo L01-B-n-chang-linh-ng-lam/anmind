@@ -2,8 +2,9 @@ import { fireEvent, render, screen } from '@testing-library/react-native';
 import { describe, expect, it, jest } from '@jest/globals';
 
 // ── Mocks ────────────────────────────────────────────────────────────────────
+const mockPush = jest.fn();
 jest.mock('expo-router', () => ({
-  useRouter: () => ({ push: jest.fn(), replace: jest.fn() }),
+  useRouter: () => ({ push: mockPush, replace: jest.fn() }),
 }));
 
 jest.mock('@expo/vector-icons', () => {
@@ -22,7 +23,7 @@ jest.mock('react-native-safe-area-context', () => {
 });
 
 // ── Subject ──────────────────────────────────────────────────────────────────
-import HomeScreen, { ACTION_ITEMS, NAV_ITEMS } from '@/app/home';
+import HomeScreen, { ACTION_ITEMS, NAV_ITEMS } from '@/app/(tabs)/index';
 
 // ── Tests ────────────────────────────────────────────────────────────────────
 describe('HomeScreen', () => {
@@ -62,19 +63,9 @@ describe('HomeScreen', () => {
   });
 
   describe('breathing orb', () => {
-    it('renders the orb container', () => {
-      render(<HomeScreen />);
-      expect(screen.getByTestId('orb-container')).toBeTruthy();
-    });
-
     it('renders the orb itself', () => {
       render(<HomeScreen />);
       expect(screen.getByTestId('orb')).toBeTruthy();
-    });
-
-    it('renders "Reset  Now" label inside the orb', () => {
-      render(<HomeScreen />);
-      expect(screen.getByText('Reset  Now')).toBeTruthy();
     });
 
     it('renders the outer glow ring', () => {
@@ -85,6 +76,13 @@ describe('HomeScreen', () => {
     it('renders the inner glow ring', () => {
       render(<HomeScreen />);
       expect(screen.getByTestId('orb-glow-inner')).toBeTruthy();
+    });
+
+    it('tapping orb navigates to reset tab', () => {
+      render(<HomeScreen />);
+      const orbPressable = screen.getByTestId('orb-container-pressable');
+      fireEvent.press(orbPressable);
+      expect(mockPush).toHaveBeenCalledWith('/(tabs)/reset');
     });
   });
 
@@ -126,51 +124,21 @@ describe('HomeScreen', () => {
       expect(screen.getByText('7-day streak continuing')).toBeTruthy();
     });
 
-    it('action cards are pressable', () => {
+    it('pressing meditation card navigates to community tab', () => {
       render(<HomeScreen />);
-      const meditation = screen.getByTestId('action-meditation');
-      const progress = screen.getByTestId('action-progress');
-      expect(() => fireEvent.press(meditation)).not.toThrow();
-      expect(() => fireEvent.press(progress)).not.toThrow();
+      fireEvent.press(screen.getByTestId('action-meditation'));
+      expect(mockPush).toHaveBeenCalledWith('/(tabs)/community');
+    });
+
+    it('pressing progress card navigates to progress screen', () => {
+      render(<HomeScreen />);
+      fireEvent.press(screen.getByTestId('action-progress'));
+      expect(mockPush).toHaveBeenCalledWith('/progress');
     });
 
     it.each(ACTION_ITEMS)('$title has correct accessibilityLabel', ({ title }) => {
       render(<HomeScreen />);
       expect(screen.getByRole('button', { name: title })).toBeTruthy();
-    });
-  });
-
-  describe('bottom navigation', () => {
-    it('renders the bottom nav container', () => {
-      render(<HomeScreen />);
-      expect(screen.getByTestId('bottom-nav')).toBeTruthy();
-    });
-
-    it('renders all 4 navigation tabs', () => {
-      render(<HomeScreen />);
-      expect(screen.getByTestId('nav-home')).toBeTruthy();
-      expect(screen.getByTestId('nav-reset')).toBeTruthy();
-      expect(screen.getByTestId('nav-community')).toBeTruthy();
-      expect(screen.getByTestId('nav-profile')).toBeTruthy();
-    });
-
-    it.each(NAV_ITEMS)('renders "$label" nav tab label text', ({ label }) => {
-      render(<HomeScreen />);
-      expect(screen.getByText(label)).toBeTruthy();
-    });
-
-    it('Home tab has active label style', () => {
-      render(<HomeScreen />);
-      // Active tab label colour is applied via navLabelActive style
-      const homeLabel = screen.getByText('Home');
-      expect(homeLabel).toBeTruthy();
-    });
-
-    it('nav tabs are pressable without throwing', () => {
-      render(<HomeScreen />);
-      ['nav-reset', 'nav-community', 'nav-profile'].forEach((id) => {
-        expect(() => fireEvent.press(screen.getByTestId(id))).not.toThrow();
-      });
     });
   });
 
