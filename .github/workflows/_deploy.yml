@@ -38,7 +38,9 @@ jobs:
           az containerapp update \
             --resource-group rg-anmind-dev \
             --name ca-anmind-dev \
-            --image ${{ inputs.acr-login-server }}/${{ inputs.image-name }}:sha-${{ github.sha }}
+            --image ${{ inputs.acr-login-server }}/${{ inputs.image-name }}:sha-${{ github.sha }} \
+            --ingress external \
+            --target-port 8080
 
       - name: Get FQDN
         id: fqdn
