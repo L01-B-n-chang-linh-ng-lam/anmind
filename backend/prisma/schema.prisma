@@ -27,17 +27,18 @@ model ResetSession {
   startedAt       DateTime  @map("started_at")
   endedAt         DateTime? @map("ended_at")
   completed       Boolean   @default(false)
+  externalId      String?   @unique @map("external_id")
   createdAt       DateTime  @default(now()) @map("created_at")
 
   user      User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
-  moodEntries MoodEntry[]
+  moodEntry MoodEntry?
 
   @@map("reset_session")
 }
 
 model MoodEntry {
   id             String   @id @default(uuid()) @db.Uuid
-  resetSessionId String   @db.Uuid @map("reset_session_id")
+  resetSessionId String   @unique @db.Uuid @map("reset_session_id")
   scoreBefore    Int?     @map("score_before")
   scoreAfter     Int?     @map("score_after")
   createdAt      DateTime @default(now()) @map("created_at")

@@ -26,6 +26,7 @@ jest.mock('expo-router', () => ({
       },
     },
   ),
+  useNavigationContainerRef: jest.fn(() => ({})),
 }));
 
 jest.mock('expo-status-bar', () => ({
@@ -37,6 +38,18 @@ jest.mock('@sentry/react-native', () => ({
   wrap: (component: any) => component,
   mobileReplayIntegration: jest.fn(() => ({})),
   feedbackIntegration: jest.fn(() => ({})),
+  reactNavigationIntegration: jest.fn(() => ({ registerNavigationContainer: jest.fn() })),
+  setTags: jest.fn(),
+}));
+
+jest.mock('@/lib/sentry', () => ({
+  navigationIntegration: { registerNavigationContainer: jest.fn() },
+}));
+
+jest.mock('expo-audio', () => ({
+  setAudioModeAsync: jest.fn().mockResolvedValue(undefined),
+  useAudioPlayer: jest.fn(() => ({ play: jest.fn(), seekTo: jest.fn().mockResolvedValue(undefined), volume: 1 })),
+  useAudioPlayerStatus: jest.fn(() => ({})),
 }));
 
 const mockUseColorScheme = jest.fn<() => 'light' | 'dark'>().mockReturnValue('light');

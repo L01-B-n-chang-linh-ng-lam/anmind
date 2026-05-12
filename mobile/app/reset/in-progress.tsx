@@ -1,21 +1,15 @@
 import { Ionicons } from '@expo/vector-icons';
-import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import BreathingOrb from '@/components/BreathingOrb';
+import { useBreathingEngine } from '@/hooks/useBreathingEngine';
 import { useAmbientSound } from '@/hooks/useAmbientSound';
 import { useBreathingAudio } from '@/hooks/useBreathingAudio';
 import { trackResetAbandoned, trackResetStarted } from '@/services/tracking.service';
 import { useResetStore } from '@/store/resetStore';
 import { useSettingsStore } from '@/store/settingsStore';
-
-const SPEED_DURATIONS: Record<string, [number, number, number]> = {
-  Slow:   [6000, 3000, 6000],
-  Normal: [4000, 2000, 4000],
-  Fast:   [2500, 1500, 2500],
-};
 
 function formatTime(seconds: number): string {
   const m = Math.floor(seconds / 60).toString().padStart(2, '0');
@@ -30,50 +24,25 @@ export default function ResetInProgressScreen() {
 
   const totalSeconds = (currentSession?.durationMinutes ?? 5) * 60;
   const [timeRemaining, setTimeRemaining] = useState(totalSeconds);
-  const [phase, setPhase] = useState<'inhale' | 'hold' | 'exhale'>('inhale');
 
-  const phaseDurations = SPEED_DURATIONS[settings.breathingSpeed] ?? SPEED_DURATIONS.Normal;
-  const [inhale, hold, exhale] = phaseDurations;
-
-  const phaseRef = useRef(phase);
-  phaseRef.current = phase;
+  const { currentPhase, phaseDurations, stop: stopEngine } = useBreathingEngine(
+    settings.breathingSpeed,
+    settings.hapticFeedbackEnabled,
+  );
 
   const { playInhale, playExhale } = useBreathingAudio(settings.resetSoundEnabled);
   useAmbientSound(settings.ambientSound);
 
-  // Breathing phase cycle
+  // Trigger audio cues in sync with phase changes from the engine
+  useEffect(() => {
+    if (currentPhase === 'inhale') playInhale();
+    else if (currentPhase === 'exhale') playExhale();
+  }, [currentPhase]);
+
+  // Track session start once
   useEffect(() => {
     trackResetStarted(currentSession?.durationMinutes ?? 5, currentSession?.scoreBefore);
-    playInhale();
-    const cycle = () => {
-      const cur = phaseRef.current;
-      if (cur === 'inhale') {
-        setPhase('hold');
-        if (settings.hapticFeedbackEnabled) {
-          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        }
-        return setTimeout(() => {
-          setPhase('exhale');
-          playExhale();
-          if (settings.hapticFeedbackEnabled) {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-          }
-          setTimeout(() => {
-            setPhase('inhale');
-            playInhale();
-            if (settings.hapticFeedbackEnabled) {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            }
-            setTimeout(cycle, inhale);
-          }, exhale);
-        }, hold);
-      }
-      return undefined;
-    };
-
-    const t = setTimeout(cycle, inhale);
-    return () => clearTimeout(t);
-  }, [inhale, hold, exhale, settings.hapticFeedbackEnabled, settings.resetSoundEnabled]);
+  }, []);
 
   // Countdown timer
   useEffect(() => {
@@ -86,6 +55,7 @@ export default function ResetInProgressScreen() {
   // Navigate when time is up — kept separate so router.replace is never called inside a state updater
   useEffect(() => {
     if (timeRemaining <= 0) {
+      stopEngine();
       router.replace('/reset/end');
     }
   }, [timeRemaining]);
@@ -96,12 +66,20 @@ export default function ResetInProgressScreen() {
       'Are you sure you want to end this session early?',
       [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'End Session', style: 'destructive', onPress: () => { trackResetAbandoned(timeRemaining); router.back(); } },
+        {
+          text: 'End Session',
+          style: 'destructive',
+          onPress: () => {
+            stopEngine();
+            trackResetAbandoned(timeRemaining);
+            router.back();
+          },
+        },
       ],
     );
   }
 
-  const phaseLabel = phase === 'inhale' ? 'Inhale...' : phase === 'hold' ? 'Hold...' : 'Exhale...';
+  const phaseLabel = currentPhase === 'inhale' ? 'Inhale...' : currentPhase === 'hold' ? 'Hold...' : 'Exhale...';
 
   return (
     <View style={styles.root}>
@@ -132,6 +110,7 @@ export default function ResetInProgressScreen() {
           <BreathingOrb
             size={220}
             phaseDurations={phaseDurations}
+            currentPhase={currentPhase}
           />
           <Text style={styles.phaseLabel} testID="phase-label">{phaseLabel}</Text>
         </View>

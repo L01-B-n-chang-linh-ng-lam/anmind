@@ -58,9 +58,7 @@ CREATE TABLE meditation_session (
     description TEXT,
     host_user_id UUID NOT NULL,
     start_time TIMESTAMP NOT NULL,
-    duration_minutes INT NOT NULL CHECK (
-        duration_minutes BETWEEN 1 AND 120
-    ),
+    duration_minutes INT NOT NULL,
     -- Agora fields
     channel_name TEXT NOT NULL UNIQUE,
     rtc_token TEXT,

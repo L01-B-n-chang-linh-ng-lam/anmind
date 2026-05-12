@@ -18,7 +18,7 @@ export class AnalyticsService {
         s.moodEntry?.scoreBefore != null && s.moodEntry?.scoreAfter != null,
     );
     const improvements = withMood.map(
-      (s) => s.moodEntry!.scoreBefore! - s.moodEntry!.scoreAfter!,
+      (s) => s.moodEntry!.scoreAfter! - s.moodEntry!.scoreBefore!,
     );
     const avg_improvement =
       improvements.length > 0
@@ -35,6 +35,28 @@ export class AnalyticsService {
       avg_improvement: Math.round(avg_improvement * 100) / 100,
       success_rate: Math.round(success_rate * 100) / 100,
       streak_days,
+    };
+  }
+
+  async getAnalytics(userId: string) {
+    const [summary, trend] = await Promise.all([
+      this.getSummary(userId),
+      this.getTrend(userId),
+    ]);
+
+    const today = new Date();
+    const weeklyData = Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(today);
+      d.setDate(d.getDate() - (6 - i));
+      const key = d.toISOString().split('T')[0];
+      return trend.find((t) => t.date === key)?.total_sessions ?? 0;
+    });
+
+    return {
+      streak: summary.streak_days,
+      totalSessions: summary.total_sessions,
+      avgImprovement: summary.avg_improvement,
+      weeklyData,
     };
   }
 
@@ -77,7 +99,7 @@ export class AnalyticsService {
     if (dates.length === 0) return 0;
 
     const unique = [...new Set(dates.map((d) => d.toISOString().split('T')[0]))]
-      .sort()
+      .sort((a, b) => a.localeCompare(b))
       .reverse();
     const today = new Date().toISOString().split('T')[0];
 

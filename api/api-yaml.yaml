@@ -1,0 +1,478 @@
+openapi: 3.0.0
+paths:
+  /:
+    get:
+      operationId: AppController_getRoot
+      parameters: []
+      responses:
+        '200':
+          description: ''
+      tags:
+        - App
+  /auth/signup:
+    post:
+      operationId: AuthController_signup
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignupDto'
+      responses:
+        '201':
+          description: Returns the new user id and username
+        '409':
+          description: Username already taken
+      summary: Register a new user
+      tags:
+        - auth
+  /auth/login:
+    post:
+      operationId: AuthController_login
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginDto'
+      responses:
+        '200':
+          description: Returns access_token and user object
+        '401':
+          description: Invalid credentials
+      summary: Login and receive a JWT token
+      tags:
+        - auth
+  /auth/me:
+    get:
+      operationId: AuthController_getMe
+      parameters: []
+      responses:
+        '200':
+          description: Returns id and username
+      security:
+        - bearer: []
+      summary: Get the currently authenticated user
+      tags:
+        - auth
+  /reset:
+    post:
+      operationId: ResetController_submit
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResetDto'
+      responses:
+        '201':
+          description: Session saved. Returns session_id, status, and improvement score.
+          content:
+            application/json:
+              schema:
+                example:
+                  session_id: 550e8400-e29b-41d4-a716-446655440000
+                  status: completed
+                  improvement: 2
+      security:
+        - bearer: []
+      summary: Submit a completed breathing reset session
+      tags:
+        - reset
+  /sync:
+    post:
+      operationId: SyncController_sync
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SyncDto'
+      responses:
+        '201':
+          description: Returns count of synced and duplicate sessions
+          content:
+            application/json:
+              schema:
+                example:
+                  synced: 3
+                  duplicates: 1
+      security:
+        - bearer: []
+      summary: Batch upload offline-queued sessions
+      tags:
+        - sync
+  /history:
+    get:
+      operationId: HistoryController_getHistory
+      parameters: []
+      responses:
+        '200':
+          description: List of reset sessions with mood entries
+          content:
+            application/json:
+              schema:
+                example:
+                  - id: 550e8400-e29b-41d4-a716-446655440000
+                    duration_minutes: 5
+                    started_at: '2026-05-12T10:00:00.000Z'
+                    ended_at: '2026-05-12T10:05:00.000Z'
+                    completed: true
+                    score_before: 2
+                    score_after: 4
+                    improvement: 2
+      security:
+        - bearer: []
+      summary: Get all past reset sessions for the current user
+      tags:
+        - history
+  /meditation-sessions:
+    get:
+      operationId: MeditationController_getSessions
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                example:
+                  - id: ms-uuid
+                    title: Morning Calm
+                    description: A gentle start to the day
+                    start_time: '2026-05-13T08:00:00.000Z'
+                    duration_minutes: 20
+                    channel_name: morning-calm-abc
+                    status: SCHEDULED
+                    max_participants: 100
+      security:
+        - bearer: []
+      summary: List all upcoming community meditation sessions
+      tags:
+        - meditation-sessions
+  /meditation-sessions/{id}:
+    get:
+      operationId: MeditationController_getSession
+      parameters:
+        - name: id
+          required: true
+          in: path
+          description: Meditation session UUID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Session detail with participant count
+        '404':
+          description: Session not found
+      security:
+        - bearer: []
+      summary: Get details of a single meditation session
+      tags:
+        - meditation-sessions
+  /meditation-sessions/{id}/join:
+    post:
+      operationId: MeditationController_joinSession
+      parameters:
+        - name: id
+          required: true
+          in: path
+          description: Meditation session UUID
+          schema:
+            type: string
+      responses:
+        '201':
+          description: ''
+          content:
+            application/json:
+              schema:
+                example:
+                  status: joined
+        '404':
+          description: Session not found
+      security:
+        - bearer: []
+      summary: Join a meditation session as audience
+      tags:
+        - meditation-sessions
+  /meditation-sessions/{id}/token:
+    get:
+      operationId: MeditationController_getToken
+      parameters:
+        - name: id
+          required: true
+          in: path
+          description: Meditation session UUID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                example:
+                  appId: agora-app-id
+                  channelName: morning-calm-abc
+                  token: agora-rtc-token-string
+                  uid: 0
+                  expiresAt: '2026-05-13T09:00:00.000Z'
+        '404':
+          description: Session not found
+      security:
+        - bearer: []
+      summary: Generate an Agora RTC token to join the session livestream
+      tags:
+        - meditation-sessions
+  /analytics:
+    get:
+      operationId: AnalyticsController_getAnalytics
+      parameters: []
+      responses:
+        '200':
+          description: Returns streak, totalSessions, avgImprovement, weeklyData[7]
+          content:
+            application/json:
+              schema:
+                example:
+                  streak: 3
+                  totalSessions: 12
+                  avgImprovement: 1.75
+                  weeklyData:
+                    - 0
+                    - 2
+                    - 1
+                    - 0
+                    - 3
+                    - 1
+                    - 2
+      security:
+        - bearer: []
+      summary: Get combined analytics for the mobile dashboard
+      tags:
+        - analytics
+  /analytics/summary:
+    get:
+      operationId: AnalyticsController_getSummary
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                example:
+                  total_sessions: 12
+                  avg_improvement: 1.75
+                  success_rate: 0.83
+                  streak_days: 3
+      security:
+        - bearer: []
+      summary: Get detailed summary stats
+      tags:
+        - analytics
+  /analytics/trend:
+    get:
+      operationId: AnalyticsController_getTrend
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                example:
+                  - date: '2026-05-10'
+                    avg_improvement: 2
+                    total_sessions: 3
+                  - date: '2026-05-11'
+                    avg_improvement: 1.5
+                    total_sessions: 2
+      security:
+        - bearer: []
+      summary: Get daily mood improvement trend
+      tags:
+        - analytics
+  /health:
+    get:
+      operationId: HealthController_getHealth
+      parameters: []
+      responses:
+        '200':
+          description: ''
+      tags:
+        - Health
+  /profile:
+    get:
+      operationId: ProfileController_getProfile
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                example:
+                  id: 550e8400-e29b-41d4-a716-446655440000
+                  username: johndoe
+                  createdAt: '2026-01-01T00:00:00.000Z'
+      security:
+        - bearer: []
+      summary: Get the current user profile
+      tags:
+        - profile
+    patch:
+      operationId: ProfileController_updateProfile
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProfileDto'
+      responses:
+        '200':
+          description: Returns the updated profile
+      security:
+        - bearer: []
+      summary: Update the current user profile
+      tags:
+        - profile
+info:
+  title: AnMind API
+  description: AnMind backend REST API
+  version: '1.0'
+  contact: {}
+tags: []
+servers: []
+components:
+  securitySchemes:
+    bearer:
+      scheme: bearer
+      bearerFormat: JWT
+      type: http
+  schemas:
+    SignupDto:
+      type: object
+      properties:
+        username:
+          type: string
+          example: johndoe
+        password:
+          type: string
+          example: secret123
+          minLength: 4
+      required:
+        - username
+        - password
+    LoginDto:
+      type: object
+      properties:
+        username:
+          type: string
+          example: johndoe
+        password:
+          type: string
+          example: secret123
+      required:
+        - username
+        - password
+    ResetDto:
+      type: object
+      properties:
+        external_id:
+          type: string
+          example: 550e8400-e29b-41d4-a716-446655440000
+          description: Client-generated UUID for deduplication
+        duration_minutes:
+          type: number
+          example: 5
+          minimum: 1
+          maximum: 30
+          description: Session duration in minutes
+        score_before:
+          type: number
+          example: 2
+          minimum: 1
+          maximum: 5
+          description: Mood score before session (1=stressed, 5=calm)
+        score_after:
+          type: number
+          example: 4
+          minimum: 1
+          maximum: 5
+          description: Mood score after session (1=stressed, 5=calm)
+        started_at:
+          type: string
+          example: '2026-05-12T10:00:00.000Z'
+        ended_at:
+          type: string
+          example: '2026-05-12T10:05:00.000Z'
+        completed:
+          type: boolean
+          example: true
+      required:
+        - external_id
+        - duration_minutes
+        - score_before
+        - score_after
+        - started_at
+    SyncItemDto:
+      type: object
+      properties:
+        external_id:
+          type: string
+          example: 550e8400-e29b-41d4-a716-446655440000
+        duration_minutes:
+          type: number
+          example: 5
+          minimum: 1
+          maximum: 30
+        score_before:
+          type: number
+          example: 2
+          minimum: 1
+          maximum: 5
+          description: 1=stressed, 5=calm
+        score_after:
+          type: number
+          example: 4
+          minimum: 1
+          maximum: 5
+          description: 1=stressed, 5=calm
+        started_at:
+          type: string
+          example: '2026-05-12T10:00:00.000Z'
+        ended_at:
+          type: string
+          example: '2026-05-12T10:05:00.000Z'
+        completed:
+          type: boolean
+          example: true
+      required:
+        - external_id
+        - duration_minutes
+        - score_before
+        - score_after
+        - started_at
+    SyncDto:
+      type: object
+      properties:
+        sessions:
+          type: array
+          items:
+            $ref: '#/components/schemas/SyncItemDto'
+      required:
+        - sessions
+    UpdateProfileDto:
+      type: object
+      properties:
+        username:
+          type: string
+          example: newusername
+          minLength: 3
+          maxLength: 30

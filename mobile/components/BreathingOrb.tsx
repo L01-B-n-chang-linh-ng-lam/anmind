@@ -7,13 +7,50 @@ import Animated, {
   withSequence,
   withTiming,
 } from 'react-native-reanimated';
+import type { BreathingPhase } from '@/hooks/useBreathingEngine';
 
 interface Props {
-  size?: number;
-  label?: string;
-  onPress?: () => void;
+  readonly size?: number;
+  readonly label?: string;
+  readonly onPress?: () => void;
   /** Duration of each cycle phase in ms: [inhale, hold, exhale] */
-  phaseDurations?: [number, number, number];
+  readonly phaseDurations?: [number, number, number];
+  /**
+   * When provided the parent (useBreathingEngine) drives the animation and
+   * phase text. The internal self-running timer is disabled to prevent drift.
+   */
+  readonly currentPhase?: BreathingPhase;
+}
+
+function phaseToLabel(p: BreathingPhase): string {
+  if (p === 'inhale') return 'Inhale...';
+  if (p === 'hold') return 'Hold...';
+  return 'Exhale...';
+}
+
+function runInternalCycle(
+  phaseRef: React.MutableRefObject<BreathingPhase>,
+  setPhaseText: (t: string) => void,
+  timerRef: React.MutableRefObject<ReturnType<typeof setTimeout> | null>,
+  inh: number,
+  hld: number,
+  exh: number,
+): void {
+  if (phaseRef.current !== 'inhale') return;
+  phaseRef.current = 'hold';
+  setPhaseText('Hold...');
+  timerRef.current = setTimeout(() => {
+    phaseRef.current = 'exhale';
+    setPhaseText('Exhale...');
+    timerRef.current = setTimeout(() => {
+      phaseRef.current = 'inhale';
+      setPhaseText('Inhale...');
+      timerRef.current = setTimeout(
+        () => runInternalCycle(phaseRef, setPhaseText, timerRef, inh, hld, exh),
+        inh,
+      );
+    }, exh);
+  }, hld);
 }
 
 export default function BreathingOrb({
@@ -21,46 +58,53 @@ export default function BreathingOrb({
   label,
   onPress,
   phaseDurations = [4000, 2000, 4000],
+  currentPhase,
 }: Props) {
   const pulseScale = useSharedValue(1);
-  const [phaseText, setPhaseText] = React.useState('Inhale...');
-  const phaseRef = useRef<'inhale' | 'hold' | 'exhale'>('inhale');
+  const [inhale, , exhale] = phaseDurations;
+
+  // ── Externally controlled mode ────────────────────────────────────────────
+  useEffect(() => {
+    if (currentPhase === undefined) return;
+    if (currentPhase === 'inhale') {
+      pulseScale.value = withTiming(1.12, { duration: inhale });
+    } else if (currentPhase === 'hold') {
+      pulseScale.value = withTiming(1.12, { duration: 80 });
+    } else {
+      pulseScale.value = withTiming(1, { duration: exhale });
+    }
+  }, [currentPhase, inhale, exhale, pulseScale]);
+
+  // ── Self-running mode (no external phase) ─────────────────────────────────
+  const [internalPhaseText, setInternalPhaseText] = React.useState('Inhale...');
+  const internalPhaseRef = useRef<BreathingPhase>('inhale');
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const [inhale, hold, exhale] = phaseDurations;
-
   useEffect(() => {
+    if (currentPhase !== undefined) return;
+
+    const [inh, hld, exh] = phaseDurations;
+
     pulseScale.value = withRepeat(
       withSequence(
-        withTiming(1.12, { duration: inhale }),
-        withTiming(1.12, { duration: hold }),
-        withTiming(1.0, { duration: exhale }),
+        withTiming(1.12, { duration: inh }),
+        withTiming(1.12, { duration: hld }),
+        withTiming(1, { duration: exh }),
       ),
       -1,
     );
 
-    const cycle = () => {
-      if (phaseRef.current === 'inhale') {
-        phaseRef.current = 'hold';
-        setPhaseText('Hold...');
-        timerRef.current = setTimeout(() => {
-          phaseRef.current = 'exhale';
-          setPhaseText('Exhale...');
-          timerRef.current = setTimeout(() => {
-            phaseRef.current = 'inhale';
-            setPhaseText('Inhale...');
-            timerRef.current = setTimeout(cycle, inhale);
-          }, exhale);
-        }, hold);
-      }
-    };
-
-    timerRef.current = setTimeout(cycle, inhale);
+    timerRef.current = setTimeout(
+      () => runInternalCycle(internalPhaseRef, setInternalPhaseText, timerRef, inh, hld, exh),
+      inh,
+    );
 
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
     };
-  }, [inhale, hold, exhale]);
+  }, [phaseDurations, currentPhase, pulseScale]);
+
+  const phaseText = currentPhase ? phaseToLabel(currentPhase) : internalPhaseText;
 
   const glowStyle = useAnimatedStyle(() => ({
     transform: [{ scale: pulseScale.value }],

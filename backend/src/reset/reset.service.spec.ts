@@ -32,8 +32,8 @@ describe('ResetService', () => {
   const dto = {
     external_id: EXTERNAL_ID,
     duration_minutes: 5,
-    score_before: 4,
-    score_after: 2,
+    score_before: 2,
+    score_after: 4,
     started_at: new Date().toISOString(),
     ended_at: new Date().toISOString(),
     completed: true,
@@ -43,7 +43,7 @@ describe('ResetService', () => {
     mockPrisma.resetSession.findUnique.mockResolvedValue({
       id: SESSION_ID,
       completed: true,
-      moodEntry: { scoreBefore: 4, scoreAfter: 2 },
+      moodEntry: { scoreBefore: 2, scoreAfter: 4 },
     });
 
     const result = await service.submit(USER_ID, dto);
@@ -65,8 +65,8 @@ describe('ResetService', () => {
         },
         moodEntry: {
           create: jest.fn().mockResolvedValue({
-            scoreBefore: 4,
-            scoreAfter: 2,
+            scoreBefore: 2,
+            scoreAfter: 4,
           }),
         },
       };

@@ -20,8 +20,24 @@ jest.mock('react-native-safe-area-context', () => {
 });
 
 jest.mock('expo-haptics', () => ({
+  selectionAsync: jest.fn().mockResolvedValue(undefined),
   impactAsync: jest.fn().mockResolvedValue(undefined),
   ImpactFeedbackStyle: { Light: 'light', Medium: 'medium', Heavy: 'heavy' },
+}));
+
+jest.mock('expo-audio', () => ({
+  useAudioPlayer: () => ({ play: jest.fn(), seekTo: jest.fn().mockResolvedValue(undefined), volume: 1 }),
+  useAudioPlayerStatus: () => ({}),
+}));
+
+jest.mock('@/hooks/useBreathingEngine', () => ({
+  useBreathingEngine: () => ({
+    currentPhase: 'inhale',
+    progress: 0,
+    phaseDurations: [4000, 2000, 6000],
+    start: jest.fn(),
+    stop: jest.fn(),
+  }),
 }));
 
 jest.mock('react-native-get-random-values', () => {});

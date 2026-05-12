@@ -8,6 +8,7 @@ import { HealthModule } from './health/health.module.js';
 import { HistoryModule } from './history/history.module.js';
 import { MeditationModule } from './meditation/meditation.module.js';
 import { PrismaModule } from './prisma/prisma.module.js';
+import { ProfileModule } from './profile/profile.module.js';
 import { ResetModule } from './reset/reset.module.js';
 import { SyncModule } from './sync/sync.module.js';
 
@@ -23,6 +24,7 @@ import { SyncModule } from './sync/sync.module.js';
     AnalyticsModule,
     DatabaseModule,
     HealthModule,
+    ProfileModule,
   ],
   controllers: [AppController],
 })

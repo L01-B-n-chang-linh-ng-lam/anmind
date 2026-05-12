@@ -43,6 +43,10 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
     return this._client.userMeditationSession;
   }
 
+  get agoraTokenLog(): Client['agoraTokenLog'] {
+    return this._client.agoraTokenLog;
+  }
+
   $transaction<T>(fn: (tx: Client) => Promise<T>): Promise<T> {
     return this._client.$transaction(fn);
   }

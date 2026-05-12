@@ -14,8 +14,8 @@ export class ResetService {
 
     if (existing) {
       const improvement = existing.moodEntry
-        ? (existing.moodEntry.scoreBefore ?? 0) -
-          (existing.moodEntry.scoreAfter ?? 0)
+        ? (existing.moodEntry.scoreAfter ?? 0) -
+          (existing.moodEntry.scoreBefore ?? 0)
         : 0;
       return {
         session_id: existing.id,
@@ -48,7 +48,7 @@ export class ResetService {
     });
 
     const improvement =
-      (result.mood.scoreBefore ?? 0) - (result.mood.scoreAfter ?? 0);
+      (result.mood.scoreAfter ?? 0) - (result.mood.scoreBefore ?? 0);
 
     return {
       session_id: result.session.id,

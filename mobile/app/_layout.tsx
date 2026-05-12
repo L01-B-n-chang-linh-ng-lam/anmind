@@ -41,7 +41,8 @@ export default Sentry.wrap(function RootLayout() {
         <Stack.Screen name="auth/forgot-password" options={{ headerShown: false }} />
         <Stack.Screen name="reset/in-progress" options={{ headerShown: false }} />
         <Stack.Screen name="reset/end" options={{ headerShown: false }} />
-<Stack.Screen name="settings" options={{ headerShown: false }} />
+        <Stack.Screen name="progress" options={{ headerShown: false }} />
+        <Stack.Screen name="settings" options={{ headerShown: false }} />
         <Stack.Screen name="meditation-room" options={{ headerShown: false }} />
       </Stack>
       <StatusBar style="auto" />

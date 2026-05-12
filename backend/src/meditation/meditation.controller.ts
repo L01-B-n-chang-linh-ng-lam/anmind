@@ -1,29 +1,79 @@
-import {
-  Controller,
-  Get,
-  Param,
-  Post,
-  Request,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Param, Post, Request, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard.js';
 import { MeditationService } from './meditation.service.js';
 
-@Controller('meditation')
+@ApiTags('meditation-sessions')
+@ApiBearerAuth()
+@Controller('meditation-sessions')
 @UseGuards(JwtAuthGuard)
 export class MeditationController {
   constructor(private readonly meditationService: MeditationService) {}
 
-  @Get('sessions')
+  @Get()
+  @ApiOperation({ summary: 'List all upcoming community meditation sessions' })
+  @ApiResponse({
+    status: 200,
+    schema: {
+      example: [
+        {
+          id: 'ms-uuid',
+          title: 'Morning Calm',
+          description: 'A gentle start to the day',
+          start_time: '2026-05-13T08:00:00.000Z',
+          duration_minutes: 20,
+          channel_name: 'morning-calm-abc',
+          status: 'SCHEDULED',
+          max_participants: 100,
+        },
+      ],
+    },
+  })
   getSessions() {
     return this.meditationService.getSessions();
   }
 
-  @Post('sessions/:id/join')
+  @Get(':id')
+  @ApiOperation({ summary: 'Get details of a single meditation session' })
+  @ApiParam({ name: 'id', description: 'Meditation session UUID' })
+  @ApiResponse({ status: 200, description: 'Session detail with participant count' })
+  @ApiResponse({ status: 404, description: 'Session not found' })
+  getSession(@Param('id') id: string) {
+    return this.meditationService.getSession(id);
+  }
+
+  @Post(':id/join')
+  @ApiOperation({ summary: 'Join a meditation session as audience' })
+  @ApiParam({ name: 'id', description: 'Meditation session UUID' })
+  @ApiResponse({ status: 201, schema: { example: { status: 'joined' } } })
+  @ApiResponse({ status: 404, description: 'Session not found' })
   joinSession(
     @Request() req: { user: { id: string } },
     @Param('id') id: string,
   ) {
     return this.meditationService.joinSession(req.user.id, id);
+  }
+
+  @Get(':id/token')
+  @ApiOperation({ summary: 'Generate an Agora RTC token to join the session livestream' })
+  @ApiParam({ name: 'id', description: 'Meditation session UUID' })
+  @ApiResponse({
+    status: 200,
+    schema: {
+      example: {
+        appId: 'agora-app-id',
+        channelName: 'morning-calm-abc',
+        token: 'agora-rtc-token-string',
+        uid: 0,
+        expiresAt: '2026-05-13T09:00:00.000Z',
+      },
+    },
+  })
+  @ApiResponse({ status: 404, description: 'Session not found' })
+  getToken(
+    @Request() req: { user: { id: string } },
+    @Param('id') id: string,
+  ) {
+    return this.meditationService.getAgoraToken(req.user.id, id);
   }
 }

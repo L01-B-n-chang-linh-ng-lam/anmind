@@ -44,4 +44,11 @@ describe('AuthController', () => {
     });
     expect(result.access_token).toBe('tok');
   });
+
+  it('getMe returns user from request', () => {
+    const result = controller.getMe({
+      user: { id: 'uid', username: 'testuser' },
+    });
+    expect(result).toEqual({ id: 'uid', username: 'testuser' });
+  });
 });
