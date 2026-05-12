@@ -3,21 +3,24 @@ import { Test, TestingModule } from '@nestjs/testing';
 import request from 'supertest';
 import { App } from 'supertest/types';
 import { GlobalExceptionFilter } from '../src/common/filters/global-exception.filter.js';
-import { AuthModule } from '../src/auth/auth.module.js';
-import { PrismaModule } from '../src/prisma/prisma.module.js';
-import { ConfigModule } from '@nestjs/config';
+import { AppModule } from '../src/app.module.js';
+import { DatabaseService } from '../src/database/database.service.js';
+import { PrismaService } from '../src/prisma/prisma.service.js';
 
-describe('Auth (e2e)', () => {
+describe('App (e2e)', () => {
   let app: INestApplication<App>;
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [
-        ConfigModule.forRoot({ isGlobal: true }),
-        PrismaModule,
-        AuthModule,
-      ],
-    }).compile();
+      imports: [AppModule],
+    })
+      .overrideProvider(DatabaseService)
+      .useValue({
+        ping: jest.fn().mockResolvedValue(true),
+      })
+      .overrideProvider(PrismaService)
+      .useValue({})
+      .compile();
 
     app = moduleFixture.createNestApplication();
     app.useGlobalPipes(
@@ -27,8 +30,28 @@ describe('Auth (e2e)', () => {
     await app.init();
   });
 
+  it('/ (GET)', () => {
+    const server = app.getHttpServer() as App;
+
+    return request(server).get('/').expect(200).expect({
+      service: 'backend',
+      status: 'ok',
+    });
+  });
+
+  it('/health (GET)', () => {
+    const server = app.getHttpServer() as App;
+
+    return request(server).get('/health').expect(200).expect({
+      status: 'ok',
+      service: 'backend',
+      database: 'up',
+    });
+  });
   afterEach(async () => {
-    await app.close();
+    if (app) {
+      await app.close();
+    }
   });
 
   it('POST /auth/signup - returns 400 for missing fields', () => {
