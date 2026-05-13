@@ -12,9 +12,6 @@ module.exports = {
     'app/**/*.{ts,tsx}',
     'components/**/*.{ts,tsx}',
     'hooks/**/*.{ts,tsx}',
-    'services/**/*.{ts,tsx}',
-    'store/**/*.{ts,tsx}',
-    'utils/**/*.{ts,tsx}',
     '!**/*.d.ts',
   ],
   transformIgnorePatterns: [
