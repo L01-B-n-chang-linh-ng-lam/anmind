@@ -94,13 +94,13 @@ function getGridLayout(participantCount: number): {
   cols: number;
   rows: number;
 } {
-  if (participantCount <= 1) {
+  if (participantCount <= 0) {
     return { cols: 1, rows: 1 }; // Full screen
-  } else if (participantCount === 2) {
+  } else if (participantCount === 1) {
     return { cols: 1, rows: 2 }; // Stack vertically
-  } else if (participantCount <= 4) {
+  } else if (participantCount <= 3) {
     return { cols: 2, rows: 2 }; // 2x2 grid
-  } else if (participantCount <= 6) {
+  } else if (participantCount <= 5) {
     return { cols: 2, rows: 3 }; // 2x3 grid
   } else {
     return { cols: 3, rows: Math.ceil(participantCount / 3) }; // 3-column

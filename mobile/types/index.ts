@@ -42,15 +42,15 @@ export interface AppSettings {
 }
 
 export const DEFAULT_SETTINGS: AppSettings = {
-  resetSoundEnabled: false,
+  resetSoundEnabled: true,
   hapticFeedbackEnabled: true,
   reminderEnabled: false,
   reminderTime: '08:00',
   defaultResetDuration: 5,
   suggestUsualMood: true,
   darkMode: true,
-  breathingSpeed: 'Normal',
-  ambientSound: 'None',
+  breathingSpeed: 'Slow',
+  ambientSound: 'Rain',
 };
 
 export interface User {
