@@ -26,6 +26,7 @@ jest.mock('@/store/authStore', () => ({
   useAuthStore: (sel?: any) => {
     const s = {
       login: jest.fn().mockResolvedValue(undefined),
+      signup: jest.fn().mockResolvedValue(undefined),
       logout: jest.fn().mockResolvedValue(undefined),
       isAuthenticated: false,
       user: null,
@@ -68,7 +69,7 @@ describe('LoginScreen', () => {
   it('shows error when submitting empty fields', () => {
     render(<LoginScreen />);
     fireEvent.press(screen.getByTestId('login-btn'));
-    expect(screen.getByText(/Please enter your email and password/i)).toBeTruthy();
+    expect(screen.getByText(/Please enter your username and password/i)).toBeTruthy();
   });
 
   it('allows typing into email field', () => {

@@ -1,44 +1,45 @@
+import * as Sentry from '@sentry/react-native';
 import type { User } from '@/types';
-import { generateId } from '@/utils/uuid';
+import { api } from './api';
+import type {
+  ApiAuthResponse,
+  LoginRequest,
+  SignupRequest,
+  SignupResponse,
+} from './api.types';
 import { getItem, removeItem, setItem, STORAGE_KEYS } from './storage.service';
 
-const MOCK_TOKEN = 'mock-jwt-token-anmind-2026';
-
-const ADMIN_USER: User = {
-  id: '11111111-1111-1111-1111-111111111111',
-  username: 'admin',
-  createdAt: '2026-01-01T00:00:00Z',
-};
-
 export async function login(
-  _email: string,
-  _password: string,
+  username: string,
+  password: string,
 ): Promise<{ user: User; token: string }> {
-  const result = { user: ADMIN_USER, token: MOCK_TOKEN };
+  const { data } = await api.post<ApiAuthResponse, { data: ApiAuthResponse }, LoginRequest>(
+    '/auth/login',
+    { username, password },
+  );
+  const result = { user: data.user, token: data.access_token };
   await setItem(STORAGE_KEYS.TOKEN, result.token);
   await setItem(STORAGE_KEYS.USER, result.user);
+  Sentry.setUser({ id: result.user.id, username: result.user.username });
   return result;
 }
 
 export async function signup(
   username: string,
   _email: string,
-  _password: string,
+  password: string,
 ): Promise<{ user: User; token: string }> {
-  const user: User = {
-    id: generateId(),
-    username,
-    createdAt: new Date().toISOString(),
-  };
-  const result = { user, token: MOCK_TOKEN };
-  await setItem(STORAGE_KEYS.TOKEN, result.token);
-  await setItem(STORAGE_KEYS.USER, result.user);
-  return result;
+  await api.post<SignupResponse, { data: SignupResponse }, SignupRequest>(
+    '/auth/signup',
+    { username, password },
+  );
+  return login(username, password);
 }
 
 export async function logout(): Promise<void> {
   await removeItem(STORAGE_KEYS.TOKEN);
   await removeItem(STORAGE_KEYS.USER);
+  Sentry.setUser(null);
 }
 
 export async function getCurrentUser(): Promise<{ user: User; token: string } | null> {

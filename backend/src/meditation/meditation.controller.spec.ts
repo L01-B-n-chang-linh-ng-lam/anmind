@@ -40,23 +40,43 @@ describe('MeditationController', () => {
     expect(result).toMatchObject({ id: 'ms-1' });
   });
 
-  it('calls joinSession with user id and session id', async () => {
-    mockMeditationService.joinSession.mockResolvedValue({ status: 'joined' });
-    const result = await controller.joinSession({ user: { id: 'uid' } }, 'ms-1');
-    expect(mockMeditationService.joinSession).toHaveBeenCalledWith('uid', 'ms-1');
-    expect(result).toEqual({ status: 'joined' });
+  describe('joinSession', () => {
+    it('calls joinSession with user id when authenticated', async () => {
+      mockMeditationService.joinSession.mockResolvedValue({ status: 'joined' });
+      const result = await controller.joinSession({ user: { id: 'uid' } }, 'ms-1');
+      expect(mockMeditationService.joinSession).toHaveBeenCalledWith('uid', 'ms-1');
+      expect(result).toEqual({ status: 'joined' });
+    });
+
+    it('calls joinSession with null when guest (no user)', async () => {
+      mockMeditationService.joinSession.mockResolvedValue({ status: 'joined' });
+      const result = await controller.joinSession({ user: undefined }, 'ms-1');
+      expect(mockMeditationService.joinSession).toHaveBeenCalledWith(null, 'ms-1');
+      expect(result).toEqual({ status: 'joined' });
+    });
   });
 
-  it('calls getAgoraToken with user id and session id', async () => {
-    mockMeditationService.getAgoraToken.mockResolvedValue({
+  describe('getToken', () => {
+    const tokenPayload = {
       appId: 'app-id',
       channelName: 'chan',
       token: 'tok',
       uid: 0,
       expiresAt: new Date().toISOString(),
+    };
+
+    it('calls getAgoraToken with user id when authenticated', async () => {
+      mockMeditationService.getAgoraToken.mockResolvedValue(tokenPayload);
+      const result = await controller.getToken({ user: { id: 'uid' } }, 'ms-1');
+      expect(mockMeditationService.getAgoraToken).toHaveBeenCalledWith('uid', 'ms-1');
+      expect(result).toMatchObject({ token: 'tok' });
     });
-    const result = await controller.getToken({ user: { id: 'uid' } }, 'ms-1');
-    expect(mockMeditationService.getAgoraToken).toHaveBeenCalledWith('uid', 'ms-1');
-    expect(result).toMatchObject({ token: 'tok' });
+
+    it('calls getAgoraToken with null when guest (no user)', async () => {
+      mockMeditationService.getAgoraToken.mockResolvedValue(tokenPayload);
+      const result = await controller.getToken({ user: undefined }, 'ms-1');
+      expect(mockMeditationService.getAgoraToken).toHaveBeenCalledWith(null, 'ms-1');
+      expect(result).toMatchObject({ token: 'tok' });
+    });
   });
 });

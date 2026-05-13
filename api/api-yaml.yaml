@@ -149,8 +149,6 @@ paths:
                     channel_name: morning-calm-abc
                     status: SCHEDULED
                     max_participants: 100
-      security:
-        - bearer: []
       summary: List all upcoming community meditation sessions
       tags:
         - meditation-sessions
@@ -169,8 +167,6 @@ paths:
           description: Session detail with participant count
         '404':
           description: Session not found
-      security:
-        - bearer: []
       summary: Get details of a single meditation session
       tags:
         - meditation-sessions
@@ -196,7 +192,7 @@ paths:
           description: Session not found
       security:
         - bearer: []
-      summary: Join a meditation session as audience
+      summary: Join a meditation session as audience (anonymous guests are allowed)
       tags:
         - meditation-sessions
   /meditation-sessions/{id}/token:
@@ -219,13 +215,13 @@ paths:
                   appId: agora-app-id
                   channelName: morning-calm-abc
                   token: agora-rtc-token-string
-                  uid: 0
+                  uid: 12345
                   expiresAt: '2026-05-13T09:00:00.000Z'
         '404':
           description: Session not found
       security:
         - bearer: []
-      summary: Generate an Agora RTC token to join the session livestream
+      summary: Generate an Agora RTC token (anonymous guests are allowed)
       tags:
         - meditation-sessions
   /analytics:

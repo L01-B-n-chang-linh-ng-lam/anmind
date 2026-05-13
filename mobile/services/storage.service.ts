@@ -6,6 +6,7 @@ export const STORAGE_KEYS = {
   TOKEN: 'authToken',
   USER: 'currentUser',
   SESSIONS: 'resetSessions',
+  LAST_SYNCED_AT: 'lastSyncedAt',
   SETTINGS: 'appSettings',
 } as const;
 

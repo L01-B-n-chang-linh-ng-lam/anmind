@@ -16,7 +16,7 @@ import { useAuthStore } from '@/store/authStore';
 
 export default function SignupScreen() {
   const router = useRouter();
-  const login = useAuthStore((s) => s.login);
+  const signup = useAuthStore((s) => s.signup);
 
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
@@ -32,7 +32,7 @@ export default function SignupScreen() {
     setError('');
     setLoading(true);
     try {
-      await login(email.trim(), password);
+      await signup(username.trim(), email.trim(), password);
       router.replace('/(tabs)');
     } catch {
       setError('Sign up failed. Please try again.');

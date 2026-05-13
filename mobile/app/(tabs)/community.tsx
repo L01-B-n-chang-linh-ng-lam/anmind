@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useEffect } from 'react';
-import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useMeditationStore } from '@/store/meditationStore';
 import type { MeditationSession } from '@/types';
@@ -78,7 +78,7 @@ function UpcomingCard({ session }: { session: MeditationSession }) {
 }
 
 export default function CommunityScreen() {
-  const { sessions, loadSessions } = useMeditationStore();
+  const { sessions, loading, error, loadSessions } = useMeditationStore();
 
   useEffect(() => {
     loadSessions();
@@ -112,6 +112,12 @@ export default function CommunityScreen() {
                 </Text>
               </View>
 
+              {loading && <ActivityIndicator color="#8E97FD" style={styles.loader} />}
+              {error && (
+                <Pressable style={styles.retryBtn} onPress={loadSessions}>
+                  <Text style={styles.retryText}>Retry</Text>
+                </Pressable>
+              )}
               {liveSession && <LiveSessionCard session={liveSession} />}
 
               <Text style={styles.sectionLabel}>Upcoming Sessions</Text>
@@ -262,4 +268,15 @@ const styles = StyleSheet.create({
   },
   alertBtnText: { color: '#8E97FD', fontSize: 12, fontWeight: '600' },
   emptyText: { color: '#9CA3AF', textAlign: 'center', marginTop: 20 },
+  loader: { marginVertical: 20 },
+  retryBtn: {
+    alignSelf: 'flex-start',
+    borderWidth: 1,
+    borderColor: '#8E97FD',
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    marginBottom: 16,
+  },
+  retryText: { color: '#8E97FD', fontSize: 13, fontWeight: '700' },
 });

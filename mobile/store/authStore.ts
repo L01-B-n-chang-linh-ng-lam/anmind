@@ -2,14 +2,17 @@ import * as Sentry from '@sentry/react-native';
 import { create } from 'zustand';
 import type { User } from '@/types';
 import * as authService from '@/services/auth.service';
+import * as profileService from '@/services/profile.service';
 
 interface AuthState {
   user: User | null;
   token: string | null;
   isAuthenticated: boolean;
   login(email: string, password: string): Promise<void>;
+  signup(username: string, email: string, password: string): Promise<void>;
   logout(): Promise<void>;
   loadAuth(): Promise<void>;
+  refreshProfile(): Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -19,6 +22,12 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   login: async (email, password) => {
     const { user, token } = await authService.login(email, password);
+    set({ user, token, isAuthenticated: true });
+    Sentry.setUser({ id: user.id, username: user.username });
+  },
+
+  signup: async (username, email, password) => {
+    const { user, token } = await authService.signup(username, email, password);
     set({ user, token, isAuthenticated: true });
     Sentry.setUser({ id: user.id, username: user.username });
   },
@@ -35,5 +44,11 @@ export const useAuthStore = create<AuthState>((set) => ({
       set({ user: result.user, token: result.token, isAuthenticated: true });
       Sentry.setUser({ id: result.user.id, username: result.user.username });
     }
+  },
+
+  refreshProfile: async () => {
+    const user = await profileService.getProfile();
+    set({ user });
+    Sentry.setUser({ id: user.id, username: user.username });
   },
 }));

@@ -20,10 +20,11 @@ jest.mock('react-native-safe-area-context', () => {
 });
 
 const mockLogin = jest.fn().mockResolvedValue(undefined);
+const mockSignup = jest.fn().mockResolvedValue(undefined);
 
 jest.mock('@/store/authStore', () => ({
   useAuthStore: (sel?: any) => {
-    const s = { login: mockLogin, logout: jest.fn(), isAuthenticated: false, user: null };
+    const s = { login: mockLogin, signup: mockSignup, logout: jest.fn(), isAuthenticated: false, user: null };
     return sel ? sel(s) : s;
   },
 }));
@@ -66,7 +67,7 @@ describe('LoginScreen flow', () => {
 import SignupScreen from '@/app/auth/signup';
 
 describe('SignupScreen flow', () => {
-  beforeEach(() => { mockReplace.mockClear(); mockLogin.mockClear(); });
+  beforeEach(() => { mockReplace.mockClear(); mockSignup.mockClear(); });
 
   it('successful signup navigates to tabs', async () => {
     render(<SignupScreen />);
@@ -80,7 +81,7 @@ describe('SignupScreen flow', () => {
   });
 
   it('shows error when signup fails', async () => {
-    mockLogin.mockRejectedValueOnce(new Error('Signup failed'));
+    mockSignup.mockRejectedValueOnce(new Error('Signup failed'));
     render(<SignupScreen />);
     fireEvent.changeText(screen.getByTestId('username-input'), 'u');
     fireEvent.changeText(screen.getByTestId('email-input'), 'e@e.com');

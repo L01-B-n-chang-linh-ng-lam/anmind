@@ -1,12 +1,11 @@
 import { Controller, Get, Param, Post, Request, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../common/guards/jwt-auth.guard.js';
+import { OptionalJwtAuthGuard } from '../common/guards/optional-jwt-auth.guard.js';
 import { MeditationService } from './meditation.service.js';
 
 @ApiTags('meditation-sessions')
-@ApiBearerAuth()
 @Controller('meditation-sessions')
-@UseGuards(JwtAuthGuard)
+@UseGuards(OptionalJwtAuthGuard)
 export class MeditationController {
   constructor(private readonly meditationService: MeditationService) {}
 
@@ -43,19 +42,21 @@ export class MeditationController {
   }
 
   @Post(':id/join')
-  @ApiOperation({ summary: 'Join a meditation session as audience' })
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Join a meditation session as audience (anonymous guests are allowed)' })
   @ApiParam({ name: 'id', description: 'Meditation session UUID' })
   @ApiResponse({ status: 201, schema: { example: { status: 'joined' } } })
   @ApiResponse({ status: 404, description: 'Session not found' })
   joinSession(
-    @Request() req: { user: { id: string } },
+    @Request() req: { user?: { id: string } },
     @Param('id') id: string,
   ) {
-    return this.meditationService.joinSession(req.user.id, id);
+    return this.meditationService.joinSession(req.user?.id ?? null, id);
   }
 
   @Get(':id/token')
-  @ApiOperation({ summary: 'Generate an Agora RTC token to join the session livestream' })
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Generate an Agora RTC token (anonymous guests are allowed)' })
   @ApiParam({ name: 'id', description: 'Meditation session UUID' })
   @ApiResponse({
     status: 200,
@@ -64,16 +65,16 @@ export class MeditationController {
         appId: 'agora-app-id',
         channelName: 'morning-calm-abc',
         token: 'agora-rtc-token-string',
-        uid: 0,
+        uid: 12345,
         expiresAt: '2026-05-13T09:00:00.000Z',
       },
     },
   })
   @ApiResponse({ status: 404, description: 'Session not found' })
   getToken(
-    @Request() req: { user: { id: string } },
+    @Request() req: { user?: { id: string } },
     @Param('id') id: string,
   ) {
-    return this.meditationService.getAgoraToken(req.user.id, id);
+    return this.meditationService.getAgoraToken(req.user?.id ?? null, id);
   }
 }

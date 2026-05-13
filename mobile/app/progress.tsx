@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useEffect } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import SessionCard from '@/components/SessionCard';
 import { useAnalyticsStore } from '@/store/analyticsStore';
@@ -10,11 +10,12 @@ import { useResetStore } from '@/store/resetStore';
 export default function ProgressScreen() {
   const router = useRouter();
 
-  const { streak, totalSessions, avgImprovement, computeAnalytics } = useAnalyticsStore();
-  const sessions = useResetStore((s) => s.sessions);
+  const { streak, totalSessions, avgImprovement, loading, error, computeAnalytics } = useAnalyticsStore();
+  const { sessions, loadSessions } = useResetStore();
 
   useEffect(() => {
     computeAnalytics();
+    loadSessions();
   }, []);
 
   const recentSessions = [...sessions]
@@ -46,6 +47,12 @@ export default function ProgressScreen() {
           </View>
 
           {/* Stats */}
+          {loading && <ActivityIndicator color="#8E97FD" style={styles.loader} />}
+          {error && (
+            <Pressable style={styles.retryBtn} onPress={computeAnalytics}>
+              <Text style={styles.retryText}>Retry</Text>
+            </Pressable>
+          )}
           <View style={styles.statsRow}>
             <View style={styles.statCard}>
               <Text style={styles.statIcon}>🔥</Text>
@@ -143,4 +150,15 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     lineHeight: 22,
   },
+  loader: { marginBottom: 16 },
+  retryBtn: {
+    alignSelf: 'center',
+    borderWidth: 1,
+    borderColor: '#8E97FD',
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    marginBottom: 16,
+  },
+  retryText: { color: '#8E97FD', fontSize: 13, fontWeight: '700' },
 });

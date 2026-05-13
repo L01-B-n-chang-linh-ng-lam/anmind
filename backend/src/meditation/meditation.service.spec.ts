@@ -106,7 +106,7 @@ describe('MeditationService', () => {
   });
 
   describe('joinSession', () => {
-    it('upserts user meditation session and returns joined status', async () => {
+    it('upserts user meditation session and returns joined status for authenticated user', async () => {
       mockPrisma.meditationSession.findUnique.mockResolvedValue(mockSession);
       mockPrisma.userMeditationSession.upsert.mockResolvedValue({});
 
@@ -116,16 +116,32 @@ describe('MeditationService', () => {
       expect(mockPrisma.userMeditationSession.upsert).toHaveBeenCalledTimes(1);
     });
 
+    it('allows guest (null userId) without creating a DB record', async () => {
+      mockPrisma.meditationSession.findUnique.mockResolvedValue(mockSession);
+
+      const result = await service.joinSession(null, SESSION_ID);
+
+      expect(result).toEqual({ status: 'joined' });
+      expect(mockPrisma.userMeditationSession.upsert).not.toHaveBeenCalled();
+    });
+
     it('throws NotFoundException when session does not exist', async () => {
       mockPrisma.meditationSession.findUnique.mockResolvedValue(null);
       await expect(
         service.joinSession(USER_ID, 'bad-id'),
       ).rejects.toBeInstanceOf(NotFoundException);
     });
+
+    it('throws NotFoundException for guest when session does not exist', async () => {
+      mockPrisma.meditationSession.findUnique.mockResolvedValue(null);
+      await expect(
+        service.joinSession(null, 'bad-id'),
+      ).rejects.toBeInstanceOf(NotFoundException);
+    });
   });
 
   describe('getAgoraToken', () => {
-    it('returns token payload when session exists', async () => {
+    it('returns token payload and writes log for authenticated user', async () => {
       mockPrisma.meditationSession.findUnique.mockResolvedValue(mockSession);
       mockPrisma.agoraTokenLog.create.mockResolvedValue({});
 
@@ -141,10 +157,31 @@ describe('MeditationService', () => {
       expect(mockPrisma.agoraTokenLog.create).toHaveBeenCalledTimes(1);
     });
 
+    it('returns token payload for guest (null userId) without writing a log', async () => {
+      mockPrisma.meditationSession.findUnique.mockResolvedValue(mockSession);
+
+      const result = await service.getAgoraToken(null, SESSION_ID);
+
+      expect(result).toMatchObject({
+        appId: 'test-agora-value',
+        channelName: 'channel-abc',
+        token: 'mock-agora-token',
+        uid: 0,
+      });
+      expect(mockPrisma.agoraTokenLog.create).not.toHaveBeenCalled();
+    });
+
     it('throws NotFoundException when session not found', async () => {
       mockPrisma.meditationSession.findUnique.mockResolvedValue(null);
       await expect(
         service.getAgoraToken(USER_ID, 'bad-id'),
+      ).rejects.toBeInstanceOf(NotFoundException);
+    });
+
+    it('throws NotFoundException for guest when session not found', async () => {
+      mockPrisma.meditationSession.findUnique.mockResolvedValue(null);
+      await expect(
+        service.getAgoraToken(null, 'bad-id'),
       ).rejects.toBeInstanceOf(NotFoundException);
     });
   });

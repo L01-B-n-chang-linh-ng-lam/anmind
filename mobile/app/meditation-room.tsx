@@ -3,6 +3,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import {
   Pressable,
+  ActivityIndicator,
   StyleSheet,
   Text,
   View,
@@ -15,7 +16,7 @@ import Animated, {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import BreathingOrb from '@/components/BreathingOrb';
 import {
-  MockMeditationRoomService,
+  AgoraMeditationRoomService,
   type MeditationRoomService,
 } from '@/services/meditation-room.service';
 import { trackMeditationSessionJoined } from '@/services/tracking.service';
@@ -65,29 +66,47 @@ function formatElapsed(seconds: number): string {
 export default function MeditationRoomScreen() {
   const router = useRouter();
   const { sessionId } = useLocalSearchParams<{ sessionId: string }>();
-  const { sessions, loadSessions } = useMeditationStore();
+  const { sessions, loadSessions, loadSession } = useMeditationStore();
 
-  const [participantCount, setParticipantCount] = useState(4200);
+  const [participantCount, setParticipantCount] = useState(0);
   const [elapsed, setElapsed] = useState(0);
   const [muted, setMuted] = useState(false);
   const [cameraOff, setCameraOff] = useState(false);
   const [handRaised, setHandRaised] = useState(false);
   const [reactions, setReactions] = useState<Reaction[]>([]);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [joining, setJoining] = useState(true);
+  const [joinError, setJoinError] = useState('');
 
-  const serviceRef = useRef<MeditationRoomService>(new MockMeditationRoomService());
+  const serviceRef = useRef<MeditationRoomService>(new AgoraMeditationRoomService());
 
   const session = sessions.find((s) => s.id === sessionId) ?? sessions[0];
 
   useEffect(() => {
-    if (sessions.length === 0) loadSessions();
-  }, []);
+    if (sessionId) loadSession(sessionId);
+    else if (sessions.length === 0) loadSessions();
+  }, [sessionId]);
 
   useEffect(() => {
-    serviceRef.current.join(sessionId ?? '');
+    let mounted = true;
+    const svc = serviceRef.current;
+
+    setJoining(true);
+    setJoinError('');
+
+    svc.join(sessionId ?? '').then(() => {
+      if (mounted) setJoining(false);
+    }).catch((error) => {
+      if (mounted) {
+        setJoinError(error instanceof Error ? error.message : 'Unable to join room.');
+        setJoining(false);
+      }
+    });
+
     trackMeditationSessionJoined(sessionId ?? '');
-    const cleanup = serviceRef.current.onParticipantCountChange((count) => {
-      setParticipantCount(count);
+
+    const cleanup = svc.onParticipantCountChange((count) => {
+      if (mounted) setParticipantCount(count);
     });
 
     const timer = setInterval(() => {
@@ -95,11 +114,12 @@ export default function MeditationRoomScreen() {
     }, 1000);
 
     return () => {
+      mounted = false;
       cleanup();
       clearInterval(timer);
-      serviceRef.current.leave();
+      svc.leave().catch(() => {});
     };
-  }, []);
+  }, [sessionId]);
 
   function sendReaction(emoji: string) {
     const reaction: Reaction = {
@@ -144,6 +164,34 @@ export default function MeditationRoomScreen() {
           </View>
           <Text style={styles.elapsedText}>{formatElapsed(elapsed)}</Text>
         </View>
+
+        {joining && (
+          <View style={styles.joiningOverlay}>
+            <ActivityIndicator color="#8E97FD" />
+            <Text style={styles.joiningText}>Joining...</Text>
+          </View>
+        )}
+
+        {joinError ? (
+          <View style={styles.errorBox}>
+            <Text style={styles.errorText}>{joinError}</Text>
+            <Pressable
+              style={styles.retryBtn}
+              onPress={() => {
+                serviceRef.current.leave();
+                setJoining(true);
+                setJoinError('');
+                serviceRef.current.join(sessionId ?? '')
+                  .then(() => setJoining(false))
+                  .catch((error) => {
+                    setJoinError(error instanceof Error ? error.message : 'Unable to join room.');
+                    setJoining(false);
+                  });
+              }}>
+              <Text style={styles.retryText}>Retry</Text>
+            </Pressable>
+          </View>
+        ) : null}
 
         {/* Orb */}
         <View style={styles.orbWrapper}>
@@ -193,6 +241,15 @@ export default function MeditationRoomScreen() {
             accessibilityLabel={cameraOff ? 'Show Camera' : 'Hide Camera'}>
             <Ionicons name={cameraOff ? 'videocam-off' : 'videocam-outline'} size={22} color={cameraOff ? '#8E97FD' : '#9CA3AF'} />
             <Text style={styles.controlLabel}>Camera</Text>
+          </Pressable>
+
+          <Pressable
+            style={styles.controlBtn}
+            onPress={() => serviceRef.current.switchCamera()}
+            accessibilityRole="button"
+            accessibilityLabel="Switch Camera">
+            <Ionicons name="camera-reverse-outline" size={22} color="#9CA3AF" />
+            <Text style={styles.controlLabel}>Switch</Text>
           </Pressable>
 
           <Pressable
@@ -274,6 +331,25 @@ const styles = StyleSheet.create({
   sessionTitle: { color: '#FFFFFF', fontSize: 15, fontWeight: '600' },
   participantCount: { color: '#9CA3AF', fontSize: 11, marginTop: 2 },
   elapsedText: { color: '#8E97FD', fontSize: 14, fontWeight: '700', fontVariant: ['tabular-nums'] },
+  joiningOverlay: { alignItems: 'center', gap: 8, marginTop: 18 },
+  joiningText: { color: '#9CA3AF', fontSize: 12 },
+  errorBox: {
+    alignItems: 'center',
+    gap: 10,
+    marginTop: 18,
+    backgroundColor: 'rgba(248,113,113,0.1)',
+    borderRadius: 12,
+    padding: 12,
+  },
+  errorText: { color: '#F87171', fontSize: 13, textAlign: 'center' },
+  retryBtn: {
+    borderWidth: 1,
+    borderColor: '#8E97FD',
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+  },
+  retryText: { color: '#8E97FD', fontSize: 13, fontWeight: '700' },
   orbWrapper: {
     flex: 1,
     alignItems: 'center',

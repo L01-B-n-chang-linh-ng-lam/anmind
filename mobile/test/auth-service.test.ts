@@ -10,20 +10,36 @@ jest.mock('@react-native-async-storage/async-storage', () => ({
   multiRemove: jest.fn().mockResolvedValue(undefined),
 }));
 
+jest.mock('@/services/api', () => ({
+  api: {
+    post: jest.fn(),
+  },
+}));
+
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { api } from '@/services/api';
 import * as authService from '@/services/auth.service';
 
 const mockSetItem = AsyncStorage.setItem as jest.MockedFunction<typeof AsyncStorage.setItem>;
 const mockGetItem = AsyncStorage.getItem as jest.MockedFunction<typeof AsyncStorage.getItem>;
 const mockRemoveItem = AsyncStorage.removeItem as jest.MockedFunction<typeof AsyncStorage.removeItem>;
+const mockPost = api.post as jest.MockedFunction<typeof api.post>;
+
+const authResponse = (username = 'admin') => ({
+  access_token: 'real-token',
+  user: { id: '111', username, createdAt: '2026-01-01T00:00:00Z' },
+});
 
 describe('authService.login', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockPost.mockResolvedValue({ data: authResponse() });
+  });
 
   it('returns user and token', async () => {
     const result = await authService.login('test@example.com', 'password');
     expect(result.user).toBeTruthy();
-    expect(result.token).toBeTruthy();
+    expect(result.token).toBe('real-token');
     expect(result.user.username).toBe('admin');
   });
 
@@ -41,10 +57,23 @@ describe('authService.login', () => {
     const result = await authService.login('anyone@test.com', 'anything');
     expect(result).toBeTruthy();
   });
+
+  it('posts username and password to /auth/login', async () => {
+    await authService.login('admin', 'password');
+    expect(mockPost).toHaveBeenCalledWith('/auth/login', {
+      username: 'admin',
+      password: 'password',
+    });
+  });
 });
 
 describe('authService.signup', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockPost
+      .mockResolvedValueOnce({ data: { id: '222', username: 'newuser' } })
+      .mockResolvedValueOnce({ data: authResponse('newuser') });
+  });
 
   it('creates a new user with the given username', async () => {
     const result = await authService.signup('newuser', 'new@example.com', 'pass');
@@ -60,6 +89,18 @@ describe('authService.signup', () => {
   it('returns a token', async () => {
     const result = await authService.signup('newuser', 'new@example.com', 'pass');
     expect(result.token).toBeTruthy();
+  });
+
+  it('signs up then logs in using the OpenAPI contract', async () => {
+    await authService.signup('newuser', 'new@example.com', 'pass');
+    expect(mockPost).toHaveBeenNthCalledWith(1, '/auth/signup', {
+      username: 'newuser',
+      password: 'pass',
+    });
+    expect(mockPost).toHaveBeenNthCalledWith(2, '/auth/login', {
+      username: 'newuser',
+      password: 'pass',
+    });
   });
 });
 

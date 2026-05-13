@@ -16,13 +16,26 @@ jest.mock('@/services/auth.service', () => ({
     user: { id: '111', username: 'testuser', createdAt: '2026-01-01T00:00:00Z' },
     token: 'mock-token',
   }),
+  signup: jest.fn().mockResolvedValue({
+    user: { id: '111', username: 'testuser', createdAt: '2026-01-01T00:00:00Z' },
+    token: 'mock-token',
+  }),
   logout: jest.fn().mockResolvedValue(undefined),
   getCurrentUser: jest.fn().mockResolvedValue(null),
 }));
 
+jest.mock('@/services/profile.service', () => ({
+  getProfile: jest.fn().mockResolvedValue({
+    id: '111',
+    username: 'testuser',
+    createdAt: '2026-01-01T00:00:00Z',
+  }),
+}));
+
 jest.mock('@/services/reset.service', () => ({
   getSessions: jest.fn().mockResolvedValue([]),
-  addSession: jest.fn().mockResolvedValue(undefined),
+  addSession: jest.fn().mockImplementation(async (session) => session),
+  upsertSession: jest.fn().mockImplementation((sessions, session) => [...sessions, session]),
   updateSession: jest.fn().mockResolvedValue(undefined),
   deleteSession: jest.fn().mockResolvedValue(undefined),
 }));
@@ -75,6 +88,7 @@ jest.mock('@/services/meditation.service', () => ({
       isLive: true,
     },
   ]),
+  getMeditationSession: jest.fn().mockResolvedValue(null),
 }));
 
 import { act, renderHook } from '@testing-library/react-native';

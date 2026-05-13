@@ -18,21 +18,21 @@ export default function LoginScreen() {
   const router = useRouter();
   const login = useAuthStore((s) => s.login);
 
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
   async function handleLogin() {
-    if (!email.trim() || !password.trim()) {
-      setError('Please enter your email and password.');
+    if (!username.trim() || !password.trim()) {
+      setError('Please enter your username and password.');
       return;
     }
     setError('');
     setLoading(true);
     try {
-      await login(email.trim(), password);
+      await login(username.trim(), password);
       router.replace('/(tabs)');
     } catch {
       setError('Login failed. Please try again.');
@@ -57,16 +57,16 @@ export default function LoginScreen() {
             {error ? <Text style={styles.error}>{error}</Text> : null}
 
             <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Email</Text>
+              <Text style={styles.inputLabel}>Username</Text>
               <View style={styles.inputRow}>
                 <Ionicons name="mail-outline" size={18} color="#9CA3AF" style={styles.inputIcon} />
                 <TextInput
                   style={styles.input}
-                  placeholder="you@example.com"
+                  placeholder="yourname"
                   placeholderTextColor="#4B5563"
-                  value={email}
-                  onChangeText={setEmail}
-                  keyboardType="email-address"
+                  value={username}
+                  onChangeText={setUsername}
+                  keyboardType="default"
                   autoCapitalize="none"
                   autoCorrect={false}
                   testID="email-input"
@@ -114,7 +114,7 @@ export default function LoginScreen() {
             </Pressable>
 
             <View style={styles.signupRow}>
-              <Text style={styles.signupText}>Don't have an account? </Text>
+              <Text style={styles.signupText}>Do not have an account? </Text>
               <Link href="/auth/signup" asChild>
                 <Pressable>
                   <Text style={styles.signupLink}>Sign Up</Text>

@@ -6,6 +6,8 @@ interface AnalyticsState {
   totalSessions: number;
   avgImprovement: number;
   weeklyData: number[];
+  loading: boolean;
+  error: string | null;
   computeAnalytics(): Promise<void>;
 }
 
@@ -14,9 +16,19 @@ export const useAnalyticsStore = create<AnalyticsState>((set) => ({
   totalSessions: 0,
   avgImprovement: 0,
   weeklyData: [0, 0, 0, 0, 0, 0, 0],
+  loading: false,
+  error: null,
 
   computeAnalytics: async () => {
-    const result = await analyticsService.getAnalytics();
-    set(result);
+    set({ loading: true, error: null });
+    try {
+      const result = await analyticsService.getAnalytics();
+      set({ ...result, loading: false });
+    } catch (error) {
+      set({
+        loading: false,
+        error: error instanceof Error ? error.message : 'Unable to load analytics.',
+      });
+    }
   },
 }));

@@ -52,6 +52,7 @@ jest.mock('@/store/resetStore', () => ({
       currentSession: { id: 'mock-uuid', durationMinutes: 5, startedAt: '2026-01-01T10:00:00Z' },
       setCurrentSession: jest.fn(), updateCurrentSession: jest.fn(),
       addSession: jest.fn().mockResolvedValue(undefined), loadSessions: jest.fn(),
+      loading: false, error: null,
     };
     return sel ? sel(s) : s;
   },
@@ -63,6 +64,7 @@ jest.mock('@/store/authStore', () => ({
       user: { id: '111', username: 'testuser', createdAt: '2026-01-01T00:00:00Z' },
       token: 'mock-token', isAuthenticated: true,
       logout: jest.fn().mockResolvedValue(undefined), loadAuth: jest.fn(),
+      refreshProfile: jest.fn().mockResolvedValue(undefined),
     };
     return sel ? sel(s) : s;
   },
@@ -75,7 +77,8 @@ jest.mock('@/store/meditationStore', () => ({
         { id: 'session-001', title: 'Deep Breath Collective', description: 'Join thousands', startTime: new Date().toISOString(), durationMinutes: 15, participantCount: 4200, isLive: true },
         { id: 'session-002', title: 'Silent Reset', description: 'Guided stillness', startTime: new Date().toISOString(), durationMinutes: 20, participantCount: 0, isLive: false },
       ],
-      currentSession: null, loadSessions: jest.fn(), setCurrentSession: jest.fn(),
+      currentSession: null, loadSessions: jest.fn(), loadSession: jest.fn().mockResolvedValue(null), setCurrentSession: jest.fn(),
+      loading: false, error: null,
     };
     return sel ? sel(s) : s;
   },
@@ -83,7 +86,7 @@ jest.mock('@/store/meditationStore', () => ({
 
 jest.mock('@/store/analyticsStore', () => ({
   useAnalyticsStore: (sel?: any) => {
-    const s = { streak: 3, totalSessions: 10, avgImprovement: 1.5, weeklyData: [1,2,0,1,3,0,0], computeAnalytics: jest.fn() };
+    const s = { streak: 3, totalSessions: 10, avgImprovement: 1.5, weeklyData: [1,2,0,1,3,0,0], loading: false, error: null, computeAnalytics: jest.fn() };
     return sel ? sel(s) : s;
   },
 }));

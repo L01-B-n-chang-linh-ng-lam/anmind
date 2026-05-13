@@ -28,7 +28,7 @@ export default function ForgotPasswordScreen() {
 
           <Text style={styles.title}>Forgot{'\n'}Password?</Text>
           <Text style={styles.sub}>
-            Enter your email and we'll send you a reset link.
+            Enter your email and we will send you a reset link.
           </Text>
 
           {submitted ? (

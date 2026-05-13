@@ -25,6 +25,8 @@ export interface ResetSession {
   completed: boolean;
   scoreBefore?: number;
   scoreAfter?: number;
+  synced?: boolean;
+  syncError?: string;
 }
 
 export interface AppSettings {
@@ -65,4 +67,7 @@ export interface MeditationSession {
   durationMinutes: number;
   participantCount: number;
   isLive: boolean;
+  channelName?: string;
+  status?: string;
+  maxParticipants?: number;
 }

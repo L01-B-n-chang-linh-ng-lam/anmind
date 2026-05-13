@@ -16,12 +16,18 @@ export default function ResetEndScreen() {
   const { currentSession, addSession } = useResetStore();
   const [moodAfter, setMoodAfter] = useState<MoodLabel | null>(null);
   const [showSurvey, setShowSurvey] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const canEnd = moodAfter !== null;
 
   async function handleEnd() {
+    if (loading) return;
+    setLoading(true);
+    setError('');
     const session: ResetSession = {
       id: currentSession?.id ?? generateId(),
+      externalId: currentSession?.externalId ?? currentSession?.id ?? generateId(),
       durationMinutes: currentSession?.durationMinutes ?? 5,
       startedAt: currentSession?.startedAt ?? new Date().toISOString(),
       endedAt: new Date().toISOString(),
@@ -29,13 +35,19 @@ export default function ResetEndScreen() {
       scoreBefore: currentSession?.scoreBefore,
       scoreAfter: moodAfter ? MOOD_SCORES[moodAfter] : undefined,
     };
-    await addSession(session);
-    trackResetCompleted(session.durationMinutes, session.scoreBefore, session.scoreAfter);
-    const completedCount = useResetStore.getState().sessions.filter((s) => s.completed).length;
-    if (completedCount % 5 === 0) {
-      setShowSurvey(true);
-    } else {
-      router.replace('/(tabs)/profile');
+    try {
+      await addSession(session);
+      trackResetCompleted(session.durationMinutes, session.scoreBefore, session.scoreAfter);
+      const completedCount = useResetStore.getState().sessions.filter((s) => s.completed).length;
+      if (completedCount % 5 === 0) {
+        setShowSurvey(true);
+      } else {
+        router.replace('/(tabs)/profile');
+      }
+    } catch {
+      setError('Unable to save this reset. Please try again.');
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -80,18 +92,19 @@ export default function ResetEndScreen() {
           )}
 
           <Text style={styles.sectionLabel}>How do you feel now?</Text>
+          {error ? <Text style={styles.error}>{error}</Text> : null}
           <View style={styles.moodSection}>
             <MoodSelector selected={moodAfter} onSelect={setMoodAfter} />
           </View>
 
           <Pressable
-            style={[styles.btn, !canEnd && styles.btnDisabled]}
+            style={[styles.btn, (!canEnd || loading) && styles.btnDisabled]}
             onPress={handleEnd}
-            disabled={!canEnd}
+            disabled={!canEnd || loading}
             accessibilityRole="button"
             accessibilityLabel="End Reset"
             testID="end-reset-btn">
-            <Text style={styles.btnText}>End Reset</Text>
+            <Text style={styles.btnText}>{loading ? 'Saving...' : 'End Reset'}</Text>
             <Ionicons name="checkmark" size={18} color="#1C0A3E" />
           </Pressable>
         </ScrollView>
@@ -165,6 +178,7 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   moodSection: { marginBottom: 28 },
+  error: { color: '#F87171', fontSize: 13, marginBottom: 12 },
   btn: {
     backgroundColor: '#8E97FD',
     borderRadius: 16,

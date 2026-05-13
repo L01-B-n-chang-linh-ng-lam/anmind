@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react-native';
+import { act, fireEvent, render, screen } from '@testing-library/react-native';
 import { describe, expect, it, jest, beforeEach } from '@jest/globals';
 
 const mockBack = jest.fn();
@@ -32,6 +32,7 @@ jest.mock('@/store/meditationStore', () => ({
       ],
       currentSession: null,
       loadSessions: jest.fn(),
+      loadSession: jest.fn().mockResolvedValue(null),
       setCurrentSession: jest.fn(),
     };
     return sel ? sel(s) : s;
@@ -39,11 +40,12 @@ jest.mock('@/store/meditationStore', () => ({
 }));
 
 jest.mock('@/services/meditation-room.service', () => ({
-  MockMeditationRoomService: class {
+  AgoraMeditationRoomService: class {
     join = jest.fn().mockResolvedValue(undefined);
     leave = jest.fn().mockResolvedValue(undefined);
     toggleMute = jest.fn().mockResolvedValue(undefined);
     toggleCamera = jest.fn().mockResolvedValue(undefined);
+    switchCamera = jest.fn().mockResolvedValue(undefined);
     raiseHand = jest.fn().mockResolvedValue(undefined);
     sendReaction = jest.fn().mockResolvedValue(undefined);
     onParticipantCountChange = jest.fn().mockReturnValue(() => {});
@@ -52,118 +54,124 @@ jest.mock('@/services/meditation-room.service', () => ({
 
 import MeditationRoomScreen from '@/app/meditation-room';
 
+async function renderRoom() {
+  const result = render(<MeditationRoomScreen />);
+  await act(async () => {});
+  return result;
+}
+
 describe('MeditationRoomScreen', () => {
   beforeEach(() => { mockBack.mockClear(); });
 
-  it('renders without crashing', () => {
-    render(<MeditationRoomScreen />);
+  it('renders without crashing', async () => {
+    await renderRoom();
     expect(screen.toJSON()).toBeTruthy();
   });
 
-  it('renders LIVE badge', () => {
-    render(<MeditationRoomScreen />);
+  it('renders LIVE badge', async () => {
+    await renderRoom();
     expect(screen.getByText('LIVE')).toBeTruthy();
   });
 
-  it('renders session title', () => {
-    render(<MeditationRoomScreen />);
+  it('renders session title', async () => {
+    await renderRoom();
     expect(screen.getByText('Deep Breath Collective')).toBeTruthy();
   });
 
-  it('renders breathing orb', () => {
-    render(<MeditationRoomScreen />);
+  it('renders breathing orb', async () => {
+    await renderRoom();
     expect(screen.getByTestId('breathing-orb')).toBeTruthy();
   });
 
-  it('renders Leave button', () => {
-    render(<MeditationRoomScreen />);
+  it('renders Leave button', async () => {
+    await renderRoom();
     expect(screen.getByTestId('leave-btn')).toBeTruthy();
   });
 
-  it('Leave button calls router.back()', () => {
-    render(<MeditationRoomScreen />);
+  it('Leave button calls router.back()', async () => {
+    await renderRoom();
     fireEvent.press(screen.getByTestId('leave-btn'));
     expect(mockBack).toHaveBeenCalled();
   });
 
-  it('renders Mute control', () => {
-    render(<MeditationRoomScreen />);
+  it('renders Mute control', async () => {
+    await renderRoom();
     expect(screen.getByRole('button', { name: /mute/i })).toBeTruthy();
   });
 
-  it('renders Camera control', () => {
-    render(<MeditationRoomScreen />);
-    expect(screen.getByRole('button', { name: /camera/i })).toBeTruthy();
+  it('renders Camera control', async () => {
+    await renderRoom();
+    expect(screen.getAllByRole('button', { name: /camera/i }).length).toBeGreaterThan(0);
   });
 
-  it('renders Raise Hand control', () => {
-    render(<MeditationRoomScreen />);
+  it('renders Raise Hand control', async () => {
+    await renderRoom();
     expect(screen.getByRole('button', { name: /hand/i })).toBeTruthy();
   });
 
-  it('renders React control', () => {
-    render(<MeditationRoomScreen />);
+  it('renders React control', async () => {
+    await renderRoom();
     expect(screen.getByRole('button', { name: /react/i })).toBeTruthy();
   });
 
-  it('shows emoji picker when React is pressed', () => {
-    render(<MeditationRoomScreen />);
+  it('shows emoji picker when React is pressed', async () => {
+    await renderRoom();
     fireEvent.press(screen.getByRole('button', { name: /react/i }));
     // Emoji picker shows reaction emojis
     expect(screen.getByText('🙏')).toBeTruthy();
   });
 
-  it('renders participant avatars', () => {
-    render(<MeditationRoomScreen />);
+  it('renders participant avatars', async () => {
+    await renderRoom();
     expect(screen.getByText('AK')).toBeTruthy();
     expect(screen.getByText('JL')).toBeTruthy();
     expect(screen.getByText('MR')).toBeTruthy();
   });
 
-  it('renders elapsed timer', () => {
-    render(<MeditationRoomScreen />);
+  it('renders elapsed timer', async () => {
+    await renderRoom();
     expect(screen.getByText('00:00')).toBeTruthy();
   });
 });
 
 // ── MeditationRoomService ─────────────────────────────────────────────────────
 import {
-  MockMeditationRoomService,
+  AgoraMeditationRoomService,
 } from '@/services/meditation-room.service';
 
-describe('MockMeditationRoomService', () => {
+describe('AgoraMeditationRoomService', () => {
   it('join resolves without error', async () => {
-    const svc = new MockMeditationRoomService();
+    const svc = new AgoraMeditationRoomService();
     await expect(svc.join('session-1')).resolves.toBeUndefined();
   });
 
   it('leave resolves without error', async () => {
-    const svc = new MockMeditationRoomService();
+    const svc = new AgoraMeditationRoomService();
     await expect(svc.leave()).resolves.toBeUndefined();
   });
 
   it('toggleMute resolves without error', async () => {
-    const svc = new MockMeditationRoomService();
+    const svc = new AgoraMeditationRoomService();
     await expect(svc.toggleMute()).resolves.toBeUndefined();
   });
 
   it('toggleCamera resolves without error', async () => {
-    const svc = new MockMeditationRoomService();
+    const svc = new AgoraMeditationRoomService();
     await expect(svc.toggleCamera()).resolves.toBeUndefined();
   });
 
   it('raiseHand resolves without error', async () => {
-    const svc = new MockMeditationRoomService();
+    const svc = new AgoraMeditationRoomService();
     await expect(svc.raiseHand()).resolves.toBeUndefined();
   });
 
   it('sendReaction resolves without error', async () => {
-    const svc = new MockMeditationRoomService();
+    const svc = new AgoraMeditationRoomService();
     await expect(svc.sendReaction('🙏')).resolves.toBeUndefined();
   });
 
   it('onParticipantCountChange returns a cleanup function', () => {
-    const svc = new MockMeditationRoomService();
+    const svc = new AgoraMeditationRoomService();
     const cleanup = svc.onParticipantCountChange(jest.fn());
     expect(typeof cleanup).toBe('function');
     cleanup(); // should not throw

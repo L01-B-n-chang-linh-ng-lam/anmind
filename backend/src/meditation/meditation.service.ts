@@ -52,7 +52,11 @@ export class MeditationService {
     };
   }
 
-  async joinSession(userId: string, sessionId: string) {
+  /**
+   * Records a join for authenticated users.  Guests (userId = null) are allowed
+   * into the room but no DB record is created for them.
+   */
+  async joinSession(userId: string | null, sessionId: string) {
     const session = await this.prisma.meditationSession.findUnique({
       where: { id: sessionId },
     });
@@ -62,23 +66,30 @@ export class MeditationService {
         message: 'Meditation session not found',
       });
 
-    await this.prisma.userMeditationSession.upsert({
-      where: {
-        userId_meditationSessionId: { userId, meditationSessionId: sessionId },
-      },
-      create: {
-        userId,
-        meditationSessionId: sessionId,
-        role: 'AUDIENCE',
-        joinedAt: new Date(),
-      },
-      update: {},
-    });
+    if (userId) {
+      await this.prisma.userMeditationSession.upsert({
+        where: {
+          userId_meditationSessionId: { userId, meditationSessionId: sessionId },
+        },
+        create: {
+          userId,
+          meditationSessionId: sessionId,
+          role: 'AUDIENCE',
+          joinedAt: new Date(),
+        },
+        update: {},
+      });
+    }
 
     return { status: 'joined' };
   }
 
-  async getAgoraToken(userId: string, sessionId: string) {
+  /**
+   * Generates an Agora RTC token.  Works for both authenticated users and
+   * anonymous guests; the token log is only written for authenticated users
+   * (guests have no User row to reference).
+   */
+  async getAgoraToken(userId: string | null, sessionId: string) {
     const session = await this.prisma.meditationSession.findUnique({
       where: { id: sessionId },
     });
@@ -106,14 +117,16 @@ export class MeditationService {
       privilegeExpiredTs,
     );
 
-    await this.prisma.agoraTokenLog.create({
-      data: {
-        userId,
-        meditationSessionId: sessionId,
-        role: 'AUDIENCE',
-        tokenExpireAt: new Date(privilegeExpiredTs * 1000),
-      },
-    });
+    if (userId) {
+      await this.prisma.agoraTokenLog.create({
+        data: {
+          userId,
+          meditationSessionId: sessionId,
+          role: 'AUDIENCE',
+          tokenExpireAt: new Date(privilegeExpiredTs * 1000),
+        },
+      });
+    }
 
     return {
       appId,

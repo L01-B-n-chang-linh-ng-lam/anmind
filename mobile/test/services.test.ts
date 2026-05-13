@@ -20,7 +20,15 @@ jest.mock('@/services/reset.service', () => ({
   ]),
 }));
 
+jest.mock('@/services/api', () => ({
+  api: {
+    get: jest.fn(),
+    post: jest.fn(),
+  },
+}));
+
 import * as analyticsService from '@/services/analytics.service';
+import { api } from '@/services/api';
 import * as meditationService from '@/services/meditation.service';
 import * as storageService from '@/services/storage.service';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -29,6 +37,7 @@ const mockSetItem = AsyncStorage.setItem as jest.MockedFunction<typeof AsyncStor
 const mockGetItem = AsyncStorage.getItem as jest.MockedFunction<typeof AsyncStorage.getItem>;
 const mockRemoveItem = AsyncStorage.removeItem as jest.MockedFunction<typeof AsyncStorage.removeItem>;
 const mockMultiRemove = AsyncStorage.multiRemove as jest.MockedFunction<typeof AsyncStorage.multiRemove>;
+const mockGet = api.get as jest.MockedFunction<typeof api.get>;
 
 // ── Storage Service ───────────────────────────────────────────────────────────
 describe('storageService', () => {
@@ -74,6 +83,17 @@ describe('storageService', () => {
 
 // ── Analytics Service ─────────────────────────────────────────────────────────
 describe('analyticsService', () => {
+  beforeEach(() => {
+    mockGet.mockResolvedValue({
+      data: {
+        streak: 3,
+        totalSessions: 12,
+        avgImprovement: 1.75,
+        weeklyData: [0, 2, 1, 0, 3, 1, 2],
+      },
+    });
+  });
+
   it('getAnalytics returns a complete result object', async () => {
     const result = await analyticsService.getAnalytics();
     expect(result).toHaveProperty('streak');
@@ -96,6 +116,34 @@ describe('analyticsService', () => {
 
 // ── Meditation Service ────────────────────────────────────────────────────────
 describe('meditationService', () => {
+  beforeEach(() => {
+    mockGet.mockResolvedValue({
+      data: [
+        {
+          id: 'session-001',
+          title: 'Deep Breath Collective',
+          description: 'Join thousands in synchronized breathing.',
+          start_time: new Date().toISOString(),
+          duration_minutes: 15,
+          channel_name: 'deep-breath',
+          status: 'LIVE',
+          max_participants: 100,
+          participant_count: 42,
+        },
+        {
+          id: 'session-002',
+          title: 'Silent Reset',
+          description: 'Guided stillness',
+          start_time: new Date().toISOString(),
+          duration_minutes: 20,
+          channel_name: 'silent-reset',
+          status: 'SCHEDULED',
+          max_participants: 100,
+        },
+      ],
+    });
+  });
+
   it('getMeditationSessions returns a non-empty array', async () => {
     const sessions = await meditationService.getMeditationSessions();
     expect(sessions.length).toBeGreaterThan(0);
@@ -106,6 +154,21 @@ describe('meditationService', () => {
     const live = sessions.find((s) => s.isLive);
     expect(live).toBeTruthy();
     expect(live?.title).toBe('Deep Breath Collective');
+  });
+
+  it('retrieves an Agora token for a session', async () => {
+    mockGet.mockResolvedValueOnce({
+      data: {
+        appId: 'agora-app-id',
+        channelName: 'deep-breath',
+        token: 'rtc-token',
+        uid: 0,
+        expiresAt: '2026-05-13T09:00:00.000Z',
+      },
+    });
+    const token = await meditationService.getMeditationToken('session-001');
+    expect(mockGet).toHaveBeenCalledWith('/meditation-sessions/session-001/token');
+    expect(token.token).toBe('rtc-token');
   });
 
   it('returns upcoming sessions', async () => {

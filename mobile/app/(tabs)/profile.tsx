@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { BarChart } from 'react-native-chart-kit';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import SessionCard from '@/components/SessionCard';
@@ -30,19 +30,21 @@ export default function ProfileScreen() {
   const { width } = useWindowDimensions();
   const chartWidth = width - 48;
 
-  const { user, isAuthenticated, logout } = useAuthStore();
+  const { user, isAuthenticated, logout, refreshProfile } = useAuthStore();
   const settings = useSettingsStore((s) => s.settings);
   const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
 
-  const { streak, totalSessions, avgImprovement, weeklyData, computeAnalytics } =
+  const { streak, totalSessions, avgImprovement, weeklyData, loading, error, computeAnalytics } =
     useAnalyticsStore();
-  const sessions = useResetStore((s) => s.sessions);
+  const { sessions, loadSessions } = useResetStore();
 
   useEffect(() => {
     AsyncStorage.getItem(STORAGE_KEYS.TOPICS).then((raw) => {
       if (raw) setSelectedTopics(JSON.parse(raw));
     });
+    if (isAuthenticated) refreshProfile().catch(() => {});
     computeAnalytics();
+    loadSessions();
   }, []);
 
   const recentSessions = [...sessions]
@@ -118,6 +120,12 @@ export default function ProfileScreen() {
 
           {/* Progress stats */}
           <Text style={styles.sectionLabel}>Your Progress</Text>
+          {loading && <ActivityIndicator color="#8E97FD" style={styles.loader} />}
+          {error && (
+            <Pressable style={styles.retryBtn} onPress={computeAnalytics}>
+              <Text style={styles.retryText}>Retry</Text>
+            </Pressable>
+          )}
           <View style={styles.statsRow}>
             <View style={styles.statCard}>
               <Text style={styles.statIcon}>🔥</Text>
@@ -337,4 +345,15 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   logoutBtnText: { color: '#F87171', fontSize: 15, fontWeight: '600' },
+  loader: { marginBottom: 14 },
+  retryBtn: {
+    alignSelf: 'flex-start',
+    borderWidth: 1,
+    borderColor: '#8E97FD',
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    marginBottom: 14,
+  },
+  retryText: { color: '#8E97FD', fontSize: 13, fontWeight: '700' },
 });

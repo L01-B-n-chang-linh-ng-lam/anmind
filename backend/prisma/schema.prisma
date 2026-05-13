@@ -85,15 +85,15 @@ model UserMeditationSession {
 }
 
 enum MeditationStatus {
-  SCHEDULED
-  LIVE
-  ENDED
-  CANCELLED
+  SCHEDULED @map("scheduled")
+  LIVE      @map("live")
+  ENDED     @map("ended")
+  CANCELLED @map("cancelled")
 }
 
 enum Role {
-  HOST
-  AUDIENCE
+  HOST     @map("host")
+  AUDIENCE @map("audience")
 }
 
 model AgoraTokenLog {
@@ -111,6 +111,6 @@ model AgoraTokenLog {
 }
 
 enum AgoraRole {
-  HOST
-  AUDIENCE
+  HOST     @map("host")
+  AUDIENCE @map("audience")
 }
