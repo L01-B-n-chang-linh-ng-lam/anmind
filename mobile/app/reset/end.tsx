@@ -6,6 +6,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import MoodSelector from '@/components/MoodSelector';
 import SatisfactionSurvey from '@/components/SatisfactionSurvey';
 import { trackResetCompleted } from '@/services/tracking.service';
+import { useAnalyticsStore } from '@/store/analyticsStore';
+import { useAuthStore } from '@/store/authStore';
 import { useResetStore } from '@/store/resetStore';
 import type { MoodLabel, ResetSession } from '@/types';
 import { MOOD_SCORES } from '@/types';
@@ -37,6 +39,7 @@ export default function ResetEndScreen() {
     };
     try {
       await addSession(session);
+      await useAnalyticsStore.getState().computeAnalytics(useAuthStore.getState().isAuthenticated);
       trackResetCompleted(session.durationMinutes, session.scoreBefore, session.scoreAfter);
       const completedCount = useResetStore.getState().sessions.filter((s) => s.completed).length;
       if (completedCount % 5 === 0) {

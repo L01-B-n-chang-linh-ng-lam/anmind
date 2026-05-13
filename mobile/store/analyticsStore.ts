@@ -8,7 +8,7 @@ interface AnalyticsState {
   weeklyData: number[];
   loading: boolean;
   error: string | null;
-  computeAnalytics(): Promise<void>;
+  computeAnalytics(isAuthenticated?: boolean): Promise<void>;
 }
 
 export const useAnalyticsStore = create<AnalyticsState>((set) => ({
@@ -19,10 +19,10 @@ export const useAnalyticsStore = create<AnalyticsState>((set) => ({
   loading: false,
   error: null,
 
-  computeAnalytics: async () => {
+  computeAnalytics: async (isAuthenticated) => {
     set({ loading: true, error: null });
     try {
-      const result = await analyticsService.getAnalytics();
+      const result = await analyticsService.getAnalytics(isAuthenticated);
       set({ ...result, loading: false });
     } catch (error) {
       set({

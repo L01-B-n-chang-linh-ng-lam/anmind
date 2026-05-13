@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from '@testing-library/react-native';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 import { describe, expect, it, jest, beforeEach } from '@jest/globals';
 
 const mockBack = jest.fn();
@@ -49,6 +49,7 @@ jest.mock('@/services/meditation-room.service', () => ({
     raiseHand = jest.fn().mockResolvedValue(undefined);
     sendReaction = jest.fn().mockResolvedValue(undefined);
     onParticipantCountChange = jest.fn().mockReturnValue(() => {});
+    onRemoteUsersChange = jest.fn().mockReturnValue(() => {});
   },
 }));
 
@@ -91,7 +92,7 @@ describe('MeditationRoomScreen', () => {
   it('Leave button calls router.back()', async () => {
     await renderRoom();
     fireEvent.press(screen.getByTestId('leave-btn'));
-    expect(mockBack).toHaveBeenCalled();
+    await waitFor(() => expect(mockBack).toHaveBeenCalled());
   });
 
   it('renders Mute control', async () => {
@@ -121,11 +122,9 @@ describe('MeditationRoomScreen', () => {
     expect(screen.getByText('🙏')).toBeTruthy();
   });
 
-  it('renders participant avatars', async () => {
+  it('renders live video placeholder while no remote users are connected', async () => {
     await renderRoom();
-    expect(screen.getByText('AK')).toBeTruthy();
-    expect(screen.getByText('JL')).toBeTruthy();
-    expect(screen.getByText('MR')).toBeTruthy();
+    expect(screen.getByText('Waiting for live video')).toBeTruthy();
   });
 
   it('renders elapsed timer', async () => {
@@ -175,5 +174,12 @@ describe('AgoraMeditationRoomService', () => {
     const cleanup = svc.onParticipantCountChange(jest.fn());
     expect(typeof cleanup).toBe('function');
     cleanup(); // should not throw
+  });
+
+  it('onRemoteUsersChange returns a cleanup function', () => {
+    const svc = new AgoraMeditationRoomService();
+    const cleanup = svc.onRemoteUsersChange(jest.fn());
+    expect(typeof cleanup).toBe('function');
+    cleanup();
   });
 });

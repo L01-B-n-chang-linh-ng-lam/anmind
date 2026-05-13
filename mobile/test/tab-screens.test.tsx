@@ -9,6 +9,7 @@ const mockBack = jest.fn();
 jest.mock('expo-router', () => ({
   useRouter: () => ({ push: mockPush, replace: mockReplace, back: mockBack }),
   useLocalSearchParams: () => ({ sessionId: 'session-001' }),
+  useFocusEffect: jest.fn(),
 }));
 
 jest.mock('@expo/vector-icons', () => {

@@ -18,6 +18,16 @@ jest.mock('@/services/reset.service', () => ({
       scoreAfter: 4,
     },
   ]),
+  getLocalSessions: jest.fn().mockResolvedValue([
+    {
+      id: 'local-1',
+      durationMinutes: 5,
+      startedAt: new Date().toISOString(),
+      completed: true,
+      scoreBefore: 2,
+      scoreAfter: 4,
+    },
+  ]),
 }));
 
 jest.mock('@/services/api', () => ({
@@ -84,6 +94,8 @@ describe('storageService', () => {
 // ── Analytics Service ─────────────────────────────────────────────────────────
 describe('analyticsService', () => {
   beforeEach(() => {
+    jest.clearAllMocks();
+    mockGetItem.mockResolvedValue(null);
     mockGet.mockResolvedValue({
       data: {
         streak: 3,
@@ -105,12 +117,31 @@ describe('analyticsService', () => {
 
   it('totalSessions counts completed sessions', async () => {
     const result = await analyticsService.getAnalytics();
-    expect(result.totalSessions).toBeGreaterThanOrEqual(0);
+    expect(result.totalSessions).toBe(1);
   });
 
   it('avgImprovement is a number', async () => {
     const result = await analyticsService.getAnalytics();
     expect(typeof result.avgImprovement).toBe('number');
+  });
+
+  it('getLocalAnalytics calculates metrics from stored reset sessions', async () => {
+    const result = await analyticsService.getLocalAnalytics();
+    expect(result.totalSessions).toBe(1);
+    expect(result.avgImprovement).toBe(2);
+  });
+
+  it('getRemoteAnalytics retrieves analytics from /analytics', async () => {
+    const result = await analyticsService.getRemoteAnalytics();
+    expect(mockGet).toHaveBeenCalledWith('/analytics');
+    expect(result.totalSessions).toBe(12);
+    expect(result.avgImprovement).toBe(1.75);
+  });
+
+  it('getAnalytics uses remote analytics when authenticated', async () => {
+    const result = await analyticsService.getAnalytics(true);
+    expect(mockGet).toHaveBeenCalledWith('/analytics');
+    expect(result.streak).toBe(3);
   });
 });
 

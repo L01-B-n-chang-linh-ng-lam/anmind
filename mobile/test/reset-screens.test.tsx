@@ -57,6 +57,18 @@ jest.mock('@/store/resetStore', () => ({
   },
 }));
 
+jest.mock('@/store/authStore', () => ({
+  useAuthStore: {
+    getState: () => ({ isAuthenticated: false }),
+  },
+}));
+
+jest.mock('@/store/analyticsStore', () => ({
+  useAnalyticsStore: {
+    getState: () => ({ computeAnalytics: jest.fn().mockResolvedValue(undefined) }),
+  },
+}));
+
 jest.mock('@/store/settingsStore', () => ({
   useSettingsStore: (sel?: any) => {
     const s = {

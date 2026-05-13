@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { useCallback, useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { BarChart } from 'react-native-chart-kit';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -38,14 +38,33 @@ export default function ProfileScreen() {
     useAnalyticsStore();
   const { sessions, loadSessions } = useResetStore();
 
-  useEffect(() => {
-    AsyncStorage.getItem(STORAGE_KEYS.TOPICS).then((raw) => {
-      if (raw) setSelectedTopics(JSON.parse(raw));
-    });
-    if (isAuthenticated) refreshProfile().catch(() => {});
-    computeAnalytics();
-    loadSessions();
-  }, []);
+  const refreshProfileData = useCallback(async () => {
+    try {
+      const raw = await AsyncStorage.getItem(STORAGE_KEYS.TOPICS);
+      setSelectedTopics(raw ? JSON.parse(raw) : []);
+    } catch {
+      setSelectedTopics([]);
+    }
+
+    try {
+      if (isAuthenticated) {
+        await refreshProfile();
+      }
+    } catch {
+      // Profile details are non-blocking for analytics refresh.
+    }
+
+    await Promise.all([
+      computeAnalytics(isAuthenticated),
+      loadSessions(),
+    ]);
+  }, [computeAnalytics, isAuthenticated, loadSessions, refreshProfile]);
+
+  useFocusEffect(
+    useCallback(() => {
+      refreshProfileData();
+    }, [refreshProfileData]),
+  );
 
   const recentSessions = [...sessions]
     .sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime())
@@ -122,7 +141,7 @@ export default function ProfileScreen() {
           <Text style={styles.sectionLabel}>Your Progress</Text>
           {loading && <ActivityIndicator color="#8E97FD" style={styles.loader} />}
           {error && (
-            <Pressable style={styles.retryBtn} onPress={computeAnalytics}>
+            <Pressable style={styles.retryBtn} onPress={() => computeAnalytics(isAuthenticated)}>
               <Text style={styles.retryText}>Retry</Text>
             </Pressable>
           )}

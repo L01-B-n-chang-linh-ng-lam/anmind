@@ -15,9 +15,7 @@ export interface MeditationRoomService {
   switchCamera(): Promise<void>;
   raiseHand(): Promise<void>;
   sendReaction(emoji: string): Promise<void>;
-  /** Returns a cleanup function that stops listening. */
   onParticipantCountChange(cb: (count: number) => void): () => void;
-  /** Returns a cleanup function that stops listening. */
   onRemoteUsersChange(cb: (uids: number[]) => void): () => void;
 }
 
@@ -40,8 +38,6 @@ export class AgoraMeditationRoomService implements MeditationRoomService {
     try {
       await requestAgoraPermissions();
 
-      // Best-effort: join the session on the backend (works for both auth and guest).
-      // Errors are swallowed so the room still loads if the backend is unreachable.
       try {
         await joinMeditationSession(sessionId);
       } catch {
@@ -54,8 +50,6 @@ export class AgoraMeditationRoomService implements MeditationRoomService {
       if (!appId) throw new Error('Agora App ID is not configured.');
       if (!channelName) throw new Error('Agora channel is not configured.');
 
-      // Dynamic import keeps react-native-agora out of the module graph at startup,
-      // preventing Expo Go from crashing before the user even opens this screen.
       const {
         ChannelProfileType,
         ClientRoleType,

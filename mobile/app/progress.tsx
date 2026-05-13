@@ -49,7 +49,7 @@ export default function ProgressScreen() {
           {/* Stats */}
           {loading && <ActivityIndicator color="#8E97FD" style={styles.loader} />}
           {error && (
-            <Pressable style={styles.retryBtn} onPress={computeAnalytics}>
+            <Pressable style={styles.retryBtn} onPress={() => computeAnalytics()}>
               <Text style={styles.retryText}>Retry</Text>
             </Pressable>
           )}
