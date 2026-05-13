@@ -113,6 +113,7 @@ export class AgoraMeditationRoomService implements MeditationRoomService {
   async leave(): Promise<void> {
     if (!this.engine) return;
     try {
+      (this.engine as { stopPreview?: () => void }).stopPreview?.();
       (this.engine as { leaveChannel?: () => void }).leaveChannel?.();
       if (this.eventHandler) {
         (this.engine as { unregisterEventHandler?: (handler: unknown) => void }).unregisterEventHandler?.(this.eventHandler);

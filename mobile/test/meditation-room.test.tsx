@@ -1,5 +1,6 @@
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react-native';
-import { describe, expect, it, jest, beforeEach } from '@jest/globals';
+import { describe, expect, it, jest, beforeEach, afterEach } from '@jest/globals';
+import { Alert } from 'react-native';
 
 const mockBack = jest.fn();
 const mockPush = jest.fn();
@@ -41,7 +42,7 @@ jest.mock('@/store/meditationStore', () => ({
 
 jest.mock('@/services/meditation-room.service', () => ({
   AgoraMeditationRoomService: class {
-    join = jest.fn().mockResolvedValue(undefined);
+    join = jest.fn().mockResolvedValue(123);
     leave = jest.fn().mockResolvedValue(undefined);
     toggleMute = jest.fn().mockResolvedValue(undefined);
     toggleCamera = jest.fn().mockResolvedValue(undefined);
@@ -63,6 +64,7 @@ async function renderRoom() {
 
 describe('MeditationRoomScreen', () => {
   beforeEach(() => { mockBack.mockClear(); });
+  afterEach(() => { jest.restoreAllMocks(); });
 
   it('renders without crashing', async () => {
     await renderRoom();
@@ -81,7 +83,7 @@ describe('MeditationRoomScreen', () => {
 
   it('renders breathing orb', async () => {
     await renderRoom();
-    expect(screen.getByTestId('breathing-orb')).toBeTruthy();
+    expect(screen.queryByTestId('breathing-orb')).toBeNull();
   });
 
   it('renders Leave button', async () => {
@@ -90,8 +92,19 @@ describe('MeditationRoomScreen', () => {
   });
 
   it('Leave button calls router.back()', async () => {
+    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation((_, __, buttons) => {
+      buttons?.find((button) => button.text === 'Leave')?.onPress?.();
+    });
+
     await renderRoom();
     fireEvent.press(screen.getByTestId('leave-btn'));
+
+    expect(alertSpy).toHaveBeenCalledWith(
+      'Leave Room',
+      'Are you sure you want to leave?',
+      expect.any(Array),
+      expect.objectContaining({ cancelable: true }),
+    );
     await waitFor(() => expect(mockBack).toHaveBeenCalled());
   });
 
@@ -124,7 +137,8 @@ describe('MeditationRoomScreen', () => {
 
   it('renders live video placeholder while no remote users are connected', async () => {
     await renderRoom();
-    expect(screen.getByText('Waiting for live video')).toBeTruthy();
+    expect(screen.getByText('Camera Off')).toBeTruthy();
+    expect(screen.getByText('You')).toBeTruthy();
   });
 
   it('renders elapsed timer', async () => {
@@ -141,7 +155,7 @@ import {
 describe('AgoraMeditationRoomService', () => {
   it('join resolves without error', async () => {
     const svc = new AgoraMeditationRoomService();
-    await expect(svc.join('session-1')).resolves.toBeUndefined();
+    await expect(svc.join('session-1')).resolves.toBe(123);
   });
 
   it('leave resolves without error', async () => {

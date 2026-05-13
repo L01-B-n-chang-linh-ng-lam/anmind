@@ -7,8 +7,8 @@ export async function requestPermissions(): Promise<boolean> {
 
 export async function scheduleReminder(time: string): Promise<string> {
   const [hourStr, minuteStr] = time.split(':');
-  const hour = parseInt(hourStr, 10);
-  const minute = parseInt(minuteStr, 10);
+  const hour = Number.parseInt(hourStr, 10);
+  const minute = Number.parseInt(minuteStr, 10);
 
   const id = await Notifications.scheduleNotificationAsync({
     content: {

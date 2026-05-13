@@ -28,12 +28,12 @@ function ToggleRow({
   value,
   onValueChange,
   testID,
-}: {
+}: Readonly<{
   label: string;
   value: boolean;
   onValueChange: (v: boolean) => void;
   testID?: string;
-}) {
+}>) {
   return (
     <View style={styles.row} testID={testID}>
       <Text style={styles.rowLabel}>{label}</Text>
@@ -52,12 +52,12 @@ function SegmentRow<T extends string>({
   options,
   selected,
   onSelect,
-}: {
+}: Readonly<{
   label: string;
   options: T[];
   selected: T;
   onSelect: (v: T) => void;
-}) {
+}>) {
   return (
     <View style={styles.segmentSection}>
       <Text style={styles.rowLabel}>{label}</Text>
@@ -203,7 +203,7 @@ export default function SettingsScreen() {
             label="Ambient Sound"
             options={['None', 'Rain', 'Ocean', 'Forest']}
             selected={settings.ambientSound as 'None' | 'Rain' | 'Ocean' | 'Forest'}
-            onSelect={(v) => update('ambientSound')(v as AppSettings['ambientSound'])}
+            onSelect={(v) => update('ambientSound')(v)}
           />
 
           {/* Notifications */}

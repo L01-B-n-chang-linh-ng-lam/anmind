@@ -29,9 +29,9 @@ function phaseToLabel(p: BreathingPhase): string {
 }
 
 function runInternalCycle(
-  phaseRef: React.MutableRefObject<BreathingPhase>,
+  phaseRef: React.RefObject<BreathingPhase>,
   setPhaseText: (t: string) => void,
-  timerRef: React.MutableRefObject<ReturnType<typeof setTimeout> | null>,
+  timerRef: React.RefObject<ReturnType<typeof setTimeout> | null>,
   inh: number,
   hld: number,
   exh: number,
@@ -78,7 +78,7 @@ export default function BreathingOrb({
   // ── Self-running mode (no external phase) ─────────────────────────────────
   const [internalPhaseText, setInternalPhaseText] = React.useState('Inhale...');
   const internalPhaseRef = useRef<BreathingPhase>('inhale');
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null) as React.RefObject<ReturnType<typeof setTimeout> | null>;
 
   useEffect(() => {
     if (currentPhase !== undefined) return;

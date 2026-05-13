@@ -2,6 +2,7 @@ import 'react-native-get-random-values';
 import 'react-native-reanimated';
 
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import * as Notifications from 'expo-notifications';
 import * as Sentry from '@sentry/react-native';
 import { setAudioModeAsync } from 'expo-audio';
 import { Stack, useNavigationContainerRef } from 'expo-router';
@@ -15,6 +16,15 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 export const unstable_settings = {
   anchor: 'index',
 };
+
+// Configure how notifications are displayed
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: true,
+  }),
+});
 
 export default Sentry.wrap(function RootLayout() {
   const colorScheme = useColorScheme();

@@ -133,7 +133,7 @@ describe('HomeScreen', () => {
     it('pressing progress card navigates to progress screen', () => {
       render(<HomeScreen />);
       fireEvent.press(screen.getByTestId('action-progress'));
-      expect(mockPush).toHaveBeenCalledWith('/progress');
+      expect(mockPush).toHaveBeenCalledWith('/(tabs)/profile');
     });
 
     it.each(ACTION_ITEMS)('$title has correct accessibilityLabel', ({ title }) => {

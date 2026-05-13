@@ -4,7 +4,7 @@ export function useBreathingAudio(enabled: boolean) {
   const inhalePlayer = useAudioPlayer(require('@/assets/sounds/inhale.wav'));
   const exhalePlayer = useAudioPlayer(require('@/assets/sounds/exhale.wav'));
 
-  inhalePlayer.volume = 0.5;
+  inhalePlayer.volume = 1;
   exhalePlayer.volume = 1;
 
   function playInhale() {

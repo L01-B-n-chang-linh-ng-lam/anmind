@@ -3,12 +3,12 @@ import { useMemo, type ComponentType } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 interface VideoTileProps {
-  uid: number;
-  isLocal: boolean;
-  isMuted?: boolean;
-  isCameraOff?: boolean;
-  label?: string;
-  RtcSurfaceView?: ComponentType<{ canvas: { uid: number }; style?: object }>;
+  readonly uid: number;
+  readonly isLocal: boolean;
+  readonly isMuted?: boolean;
+  readonly isCameraOff?: boolean;
+  readonly label?: string;
+  readonly RtcSurfaceView?: ComponentType<{ canvas: { uid: number }; style?: object }>;
 }
 
 export function VideoTile({
