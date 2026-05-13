@@ -22,12 +22,13 @@ import { VideoTile } from '@/components/VideoTile';
 import {
   AgoraMeditationRoomService,
   type MeditationRoomService,
-} from '@/services/meditation-room.service';
+} from '../services/meditation-room.service';
 import { trackMeditationSessionJoined } from '@/services/tracking.service';
 import { useMeditationStore } from '@/store/meditationStore';
 
 const REACTION_EMOJIS = ['🙏', '❤️', '✨', '🌊', '🌿'];
-const RtcSurfaceView = loadRtcSurfaceView();
+const RtcSurfaceView = loadRtcSurfaceView('surface');
+const RtcTextureView = loadRtcSurfaceView('texture');
 
 interface Reaction {
   id: string;
@@ -67,13 +68,18 @@ function formatElapsed(seconds: number): string {
   return `${m}:${s}`;
 }
 
-function loadRtcSurfaceView(): ComponentType<{ canvas: { uid: number }; style?: object }> | null {
+function loadRtcSurfaceView(
+  kind: 'surface' | 'texture',
+): ComponentType<{ canvas: { uid: number }; style?: object }> | null {
   if (Platform.OS === 'web') {
     return null;
   }
 
   try {
     const agora = require('react-native-agora');
+    if (kind === 'texture') {
+      return agora.RtcTextureView ?? null;
+    }
     return agora.RtcSurfaceView ?? null;
   } catch {
     return null;
@@ -150,15 +156,15 @@ export default function MeditationRoomScreen() {
       const svc = serviceRef.current;
 
       // Join the meditation room via Agora.
-      await svc.join(sessionId);
+      const joinedUid = await svc.join(sessionId);
       setIsJoined(true);
-      setLocalUid(Math.floor(Math.random() * 1000000)); // Placeholder UID for local preview
+      setLocalUid(joinedUid);
 
       // Register listeners.
-      const unsubscribeParticipants = svc.onParticipantCountChange((count) => {
+      const unsubscribeParticipants = svc.onParticipantCountChange((count: number) => {
         setParticipantCount(count);
       });
-      const unsubscribeRemoteUsers = svc.onRemoteUsersChange((uids) => {
+      const unsubscribeRemoteUsers = svc.onRemoteUsersChange((uids: number[]) => {
         setRemoteUids(uids);
       });
 
@@ -368,7 +374,9 @@ export default function MeditationRoomScreen() {
                         ? 'You'
                         : `Participant ${participant.uid}`
                     }
-                    RtcSurfaceView={RtcSurfaceView ?? undefined}
+                    RtcSurfaceView={
+                      participant.isLocal ? RtcTextureView ?? undefined : RtcSurfaceView ?? undefined
+                    }
                   />
                 </View>
               ))}

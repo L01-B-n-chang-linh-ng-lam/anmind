@@ -1,47 +1,38 @@
-import type {
-  IRtcEngine,
-  IRtcEngineEventHandler,
-  RtcConnection,
-} from 'react-native-agora';
 import { PermissionsAndroid, Platform, type Permission } from 'react-native';
 import { getUserFriendlyError } from './api';
 import { getMeditationToken, joinMeditationSession } from './meditation.service';
 
 export interface MeditationRoomService {
-  join(sessionId: string): Promise<void>;
+  join(sessionId: string): Promise<number>;
   leave(): Promise<void>;
   toggleMute(): Promise<void>;
   toggleCamera(): Promise<void>;
   switchCamera(): Promise<void>;
   raiseHand(): Promise<void>;
   sendReaction(emoji: string): Promise<void>;
-  /** Returns a cleanup function that stops listening. */
   onParticipantCountChange(cb: (count: number) => void): () => void;
-  /** Returns a cleanup function that stops listening. */
   onRemoteUsersChange(cb: (uids: number[]) => void): () => void;
 }
 
 export class AgoraMeditationRoomService implements MeditationRoomService {
-  private engine: IRtcEngine | null = null;
-  private eventHandler: IRtcEngineEventHandler | null = null;
+  private engine: unknown = null;
+  private eventHandler: unknown = null;
   private muted = false;
   private cameraOff = false;
   private participantCount = 1;
-  private remoteUids = new Set<number>();
-  private participantListeners = new Set<(count: number) => void>();
-  private remoteUserListeners = new Set<(uids: number[]) => void>();
+  private readonly remoteUids = new Set<number>();
+  private readonly participantListeners = new Set<(count: number) => void>();
+  private readonly remoteUserListeners = new Set<(uids: number[]) => void>();
   private joining = false;
 
-  async join(sessionId: string): Promise<void> {
+  async join(sessionId: string): Promise<number> {
     if (!sessionId) throw new Error('Meditation session is missing.');
-    if (this.joining || this.engine) return;
+    if (this.joining || this.engine) return 0;
     this.joining = true;
 
     try {
       await requestAgoraPermissions();
 
-      // Best-effort: join the session on the backend (works for both auth and guest).
-      // Errors are swallowed so the room still loads if the backend is unreachable.
       try {
         await joinMeditationSession(sessionId);
       } catch {
@@ -53,9 +44,10 @@ export class AgoraMeditationRoomService implements MeditationRoomService {
 
       if (!appId) throw new Error('Agora App ID is not configured.');
       if (!channelName) throw new Error('Agora channel is not configured.');
+      if (Platform.OS === 'web') {
+        throw new Error('Live meditation rooms are only available on native platforms.');
+      }
 
-      // Dynamic import keeps react-native-agora out of the module graph at startup,
-      // preventing Expo Go from crashing before the user even opens this screen.
       const {
         ChannelProfileType,
         ClientRoleType,
@@ -71,37 +63,34 @@ export class AgoraMeditationRoomService implements MeditationRoomService {
       engine.setClientRole(ClientRoleType.ClientRoleBroadcaster);
       engine.enableAudio();
       engine.enableVideo();
+      engine.startPreview?.();
 
       this.remoteUids.clear();
       this.setParticipantCount(1);
 
       this.eventHandler = {
-        onJoinChannelSuccess: (_connection?: RtcConnection) =>
-          this.updateParticipantCount(),
-        onUserJoined: (_connection?: RtcConnection, remoteUid?: number) => {
+        onJoinChannelSuccess: () => this.updateParticipantCount(),
+        onUserJoined: (_connection?: unknown, remoteUid?: number) => {
           if (typeof remoteUid === 'number') {
             this.remoteUids.add(remoteUid);
             this.emitRemoteUsers();
           }
           this.updateParticipantCount();
         },
-        onUserOffline: (_connection?: RtcConnection, remoteUid?: number) => {
+        onUserOffline: (_connection?: unknown, remoteUid?: number) => {
           if (typeof remoteUid === 'number') {
             this.remoteUids.delete(remoteUid);
             this.emitRemoteUsers();
           }
           this.updateParticipantCount();
         },
-        onLeaveChannel: (
-          _connection?: RtcConnection,
-          stats?: { userCount?: number },
-        ) => {
+        onLeaveChannel: (_connection?: unknown, stats?: { userCount?: number }) => {
           this.remoteUids.clear();
           this.emitRemoteUsers();
           this.setParticipantCount(stats?.userCount ?? 0);
         },
       };
-      engine.registerEventHandler(this.eventHandler);
+      engine.registerEventHandler(this.eventHandler as never);
 
       const joinResult = engine.joinChannel(token ?? null, channelName, uid ?? 0, {
         clientRoleType: ClientRoleType.ClientRoleBroadcaster,
@@ -112,6 +101,7 @@ export class AgoraMeditationRoomService implements MeditationRoomService {
       }
 
       this.engine = engine;
+      return uid ?? 0;
     } catch (error) {
       await this.leave();
       throw new Error(getUserFriendlyError(error));
@@ -123,11 +113,11 @@ export class AgoraMeditationRoomService implements MeditationRoomService {
   async leave(): Promise<void> {
     if (!this.engine) return;
     try {
-      this.engine.leaveChannel();
+      (this.engine as { leaveChannel?: () => void }).leaveChannel?.();
       if (this.eventHandler) {
-        this.engine.unregisterEventHandler(this.eventHandler);
+        (this.engine as { unregisterEventHandler?: (handler: unknown) => void }).unregisterEventHandler?.(this.eventHandler);
       }
-      this.engine.release();
+      (this.engine as { release?: () => void }).release?.();
     } catch {
       // ignore errors on teardown
     } finally {
@@ -141,20 +131,25 @@ export class AgoraMeditationRoomService implements MeditationRoomService {
 
   async toggleMute(): Promise<void> {
     this.muted = !this.muted;
-    this.engine?.muteLocalAudioStream(this.muted);
+    (this.engine as { muteLocalAudioStream?: (enabled: boolean) => void } | null)?.muteLocalAudioStream?.(this.muted);
   }
 
   async toggleCamera(): Promise<void> {
     this.cameraOff = !this.cameraOff;
-    this.engine?.muteLocalVideoStream(this.cameraOff);
+    (this.engine as { muteLocalVideoStream?: (enabled: boolean) => void } | null)?.muteLocalVideoStream?.(this.cameraOff);
   }
 
   async switchCamera(): Promise<void> {
-    this.engine?.switchCamera();
+    (this.engine as { switchCamera?: () => void } | null)?.switchCamera?.();
   }
 
-  async raiseHand(): Promise<void> {}
-  async sendReaction(_emoji: string): Promise<void> {}
+  async raiseHand(): Promise<void> {
+    return undefined;
+  }
+
+  async sendReaction(_emoji: string): Promise<void> {
+    return undefined;
+  }
 
   onParticipantCountChange(cb: (count: number) => void): () => void {
     this.participantListeners.add(cb);

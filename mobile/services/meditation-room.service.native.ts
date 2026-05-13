@@ -8,7 +8,7 @@ import { getUserFriendlyError } from './api';
 import { getMeditationToken, joinMeditationSession } from './meditation.service';
 
 export interface MeditationRoomService {
-  join(sessionId: string): Promise<void>;
+  join(sessionId: string): Promise<number>;
   leave(): Promise<void>;
   toggleMute(): Promise<void>;
   toggleCamera(): Promise<void>;
@@ -25,12 +25,12 @@ export class AgoraMeditationRoomService implements MeditationRoomService {
   private muted = false;
   private cameraOff = false;
   private participantCount = 1;
-  private remoteUids = new Set<number>();
-  private participantListeners = new Set<(count: number) => void>();
-  private remoteUserListeners = new Set<(uids: number[]) => void>();
+  private readonly remoteUids = new Set<number>();
+  private readonly participantListeners = new Set<(count: number) => void>();
+  private readonly remoteUserListeners = new Set<(uids: number[]) => void>();
   private joining = false;
 
-  async join(sessionId: string): Promise<void> {
+  async join(sessionId: string): Promise<number> {
     if (!sessionId) throw new Error('Meditation session is missing.');
     if (this.joining || this.engine) return;
     this.joining = true;
@@ -65,6 +65,7 @@ export class AgoraMeditationRoomService implements MeditationRoomService {
       engine.setClientRole(ClientRoleType.ClientRoleBroadcaster);
       engine.enableAudio();
       engine.enableVideo();
+      engine.startPreview?.();
 
       this.remoteUids.clear();
       this.setParticipantCount(1);
@@ -106,6 +107,7 @@ export class AgoraMeditationRoomService implements MeditationRoomService {
       }
 
       this.engine = engine;
+      return uid ?? 0;
     } catch (error) {
       await this.leave();
       throw new Error(getUserFriendlyError(error));
@@ -147,8 +149,13 @@ export class AgoraMeditationRoomService implements MeditationRoomService {
     this.engine?.switchCamera();
   }
 
-  async raiseHand(): Promise<void> {}
-  async sendReaction(_emoji: string): Promise<void> {}
+  async raiseHand(): Promise<void> {
+    return;
+  }
+
+  async sendReaction(_emoji: string): Promise<void> {
+    return;
+  }
 
   onParticipantCountChange(cb: (count: number) => void): () => void {
     this.participantListeners.add(cb);
