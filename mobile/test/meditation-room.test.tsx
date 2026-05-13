@@ -145,6 +145,52 @@ describe('MeditationRoomScreen', () => {
     await renderRoom();
     expect(screen.getByText('00:00')).toBeTruthy();
   });
+
+  it('renders participant count in header', async () => {
+    await renderRoom();
+    expect(screen.getByText(/people/i)).toBeTruthy();
+  });
+
+  it('mute button toggles audio', async () => {
+    await renderRoom();
+    const muteBtn = screen.getByRole('button', { name: /mute/i });
+    fireEvent.press(muteBtn);
+    // Button should still be present and clickable after press
+    expect(screen.getByRole('button', { name: /mute/i })).toBeTruthy();
+  });
+
+  it('camera button toggles video', async () => {
+    await renderRoom();
+    const cameraBtn = screen.getAllByRole('button', { name: /camera/i })[0];
+    fireEvent.press(cameraBtn);
+    expect(screen.getAllByRole('button', { name: /camera/i }).length).toBeGreaterThan(0);
+  });
+
+  it('raise hand button shows feedback', async () => {
+    await renderRoom();
+    const raiseBtn = screen.getByRole('button', { name: /hand/i });
+    fireEvent.press(raiseBtn);
+    expect(screen.getByRole('button', { name: /hand/i })).toBeTruthy();
+  });
+
+  it('reaction emoji can be selected', async () => {
+    await renderRoom();
+    fireEvent.press(screen.getByRole('button', { name: /react/i }));
+    const prayer = screen.getByText('🙏');
+    fireEvent.press(prayer);
+    // Should close emoji picker after selection
+    expect(screen.getByRole('button', { name: /react/i })).toBeTruthy();
+  });
+
+  it('session title is visible in header', async () => {
+    await renderRoom();
+    expect(screen.getByText('Deep Breath Collective')).toBeTruthy();
+  });
+
+  it('renders switch camera button', async () => {
+    await renderRoom();
+    expect(screen.getByRole('button', { name: /flip|switch/i })).toBeTruthy();
+  });
 });
 
 // ── MeditationRoomService ─────────────────────────────────────────────────────

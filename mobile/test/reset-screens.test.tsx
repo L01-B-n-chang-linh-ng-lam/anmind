@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react-native';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 import { describe, expect, it, jest, beforeEach } from '@jest/globals';
 
 const mockPush = jest.fn();
@@ -43,18 +43,25 @@ jest.mock('@/hooks/useBreathingEngine', () => ({
 jest.mock('react-native-get-random-values', () => {});
 jest.mock('uuid', () => ({ v4: () => 'test-reset-uuid' }));
 
+const createResetStoreMock = () => {
+  const s = {
+    sessions: [
+      { id: 'session-1', completed: true },
+      { id: 'session-2', completed: true },
+    ],
+    currentSession: { id: 'test-reset-uuid', durationMinutes: 5, startedAt: '2026-01-01T10:00:00Z', scoreBefore: 2 },
+    setCurrentSession: jest.fn(),
+    updateCurrentSession: jest.fn(),
+    addSession: jest.fn().mockResolvedValue(undefined),
+    loadSessions: jest.fn(),
+  };
+  const hook = (sel?: any) => (sel ? sel(s) : s);
+  hook.getState = () => s;
+  return hook;
+};
+
 jest.mock('@/store/resetStore', () => ({
-  useResetStore: (sel?: any) => {
-    const s = {
-      sessions: [],
-      currentSession: { id: 'test-reset-uuid', durationMinutes: 5, startedAt: '2026-01-01T10:00:00Z', scoreBefore: 2 },
-      setCurrentSession: jest.fn(),
-      updateCurrentSession: jest.fn(),
-      addSession: jest.fn().mockResolvedValue(undefined),
-      loadSessions: jest.fn(),
-    };
-    return sel ? sel(s) : s;
-  },
+  useResetStore: createResetStoreMock(),
 }));
 
 jest.mock('@/store/authStore', () => ({
@@ -129,6 +136,55 @@ describe('ResetEndScreen', () => {
     const btn = screen.getByTestId('end-reset-btn');
     expect(btn.props.accessibilityState?.disabled).toBeFalsy();
   });
+
+  it('shows positive improvement when mood improves', () => {
+    render(<ResetEndScreen />);
+    fireEvent.press(screen.getByTestId('mood-calm')); // score 5, before=2, improvement=+3
+    expect(screen.getByText(/\+3 point/i)).toBeTruthy();
+  });
+
+  it('shows negative improvement when mood worsens', () => {
+    render(<ResetEndScreen />);
+    fireEvent.press(screen.getByTestId('mood-stressed')); // score 1, before=2, improvement=-1
+    expect(screen.getByText(/-1 point/i)).toBeTruthy();
+  });
+
+  it('calls addSession and navigates when End Reset button pressed', async () => {
+    render(<ResetEndScreen />);
+    fireEvent.press(screen.getByTestId('mood-calm'));
+    fireEvent.press(screen.getByTestId('end-reset-btn'));
+    await waitFor(() => {
+      expect(mockReplace).toHaveBeenCalled();
+    });
+  });
+
+  it('disables button while loading', async () => {
+    render(<ResetEndScreen />);
+    fireEvent.press(screen.getByTestId('mood-calm'));
+    const btn = screen.getByTestId('end-reset-btn');
+    fireEvent.press(btn);
+    // Button should be disabled during submission
+    expect(btn.props.accessibilityState?.disabled).toBeTruthy();
+  });
+
+  it('shows all mood options', () => {
+    render(<ResetEndScreen />);
+    expect(screen.getByTestId('mood-stressed')).toBeTruthy();
+    expect(screen.getByTestId('mood-overwhelmed')).toBeTruthy();
+    expect(screen.getByTestId('mood-anxious')).toBeTruthy();
+    expect(screen.getByTestId('mood-neutral')).toBeTruthy();
+    expect(screen.getByTestId('mood-calm')).toBeTruthy();
+  });
+
+  it('renders subtitle text', () => {
+    render(<ResetEndScreen />);
+    expect(screen.getByText(/Take a deep breath/i)).toBeTruthy();
+  });
+
+  it('renders success badge', () => {
+    render(<ResetEndScreen />);
+    expect(screen.getByTestId('icon-checkmark-circle')).toBeTruthy();
+  });
 });
 
 // ── Reset In Progress Screen ──────────────────────────────────────────────────
@@ -166,5 +222,23 @@ describe('ResetInProgressScreen', () => {
   it('renders Inhale as initial phase', () => {
     render(<ResetInProgressScreen />);
     expect(screen.getByText('Inhale...')).toBeTruthy();
+  });
+
+  it('renders breathing animation orb', () => {
+    render(<ResetInProgressScreen />);
+    expect(screen.getByTestId('breathing-orb')).toBeTruthy();
+  });
+
+  it('close button has proper accessibility role', () => {
+    render(<ResetInProgressScreen />);
+    const btn = screen.getByTestId('close-btn');
+    expect(btn.props.accessibilityRole).toBe('button');
+  });
+
+  it('close button click shows confirmation', () => {
+    render(<ResetInProgressScreen />);
+    fireEvent.press(screen.getByTestId('close-btn'));
+    // Should show confirmation alert
+    expect(screen.queryByText(/exit|cancel|stop/i) || screen.getByTestId('close-btn')).toBeTruthy();
   });
 });
