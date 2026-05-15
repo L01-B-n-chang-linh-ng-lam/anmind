@@ -256,9 +256,9 @@ export default function MeditationRoomScreen() {
    */
   function sendReaction(emoji: string) {
     const reaction: Reaction = {
-      id: `${Date.now()}-${Math.random()}`,
+      id: crypto.randomUUID(),
       emoji,
-      x: Math.random() * 200 + 60,
+      x: (crypto.getRandomValues(new Uint32Array(1))[0] / 0xFFFFFFFF) * 200 + 60,
     };
     setReactions((prev) => [...prev, reaction]);
     setTimeout(() => removeReaction(reaction.id), 2200);
